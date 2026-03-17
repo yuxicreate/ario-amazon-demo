@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <title>Try Ario — See Ario in Action</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #2B5CFF;
+      --blue-deep: #1A4AE6;
+      --blue-pale: #EEF2FF;
+      --blue-dim: rgba(43,92,255,0.08);
+      --ink: #111111;
+      --ink-soft: #2A2A2A;
+      --ink-muted: #555555;
+      --ink-faint: #999999;
+      --paper: #FAFAFA;
+      --paper-warm: #F5F5F3;
+      --rule: #E0E0E0;
+      --rule-light: #EDEDEB;
+      --parchment: #F0EDE6;
+      --parchment-light: #F8F6F2;
+      --parchment-warm: #E8E4DB;
+      --kraft: #D5CFC3;
+      --green: #1D8B4E;
+      --green-pale: #E8F5EE;
+      --green-dim: rgba(29,139,78,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--parchment-light);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--rule-light);
+      padding: 0 clamp(20px, 4vw, 48px);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 100;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { height: 22px; display: block; }
+    .topbar-sep { width: 1px; height: 18px; background: var(--rule); }
+    .topbar-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint);
+    }
+    .topbar-back {
+      font-size: 13px; font-weight: 600; color: var(--blue);
+      text-decoration: none; display: flex; align-items: center; gap: 4px;
+    }
+    .topbar-back:hover { text-decoration: underline; }
+    .topbar-back svg { width: 14px; height: 14px; }
+
+    /* ── MAIN AREA (below topbar) ── */
+    .main-area {
+      height: calc(100vh - 56px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .screen.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* ── FULL-WIDTH NARRATIVE SCREENS ── */
+    .screen-narrative {
+      background: var(--parchment-light);
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    /* grain */
+    .screen-narrative::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* ruled lines */
+    .screen-narrative::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 39px,
+          var(--parchment-warm) 39px,
+          var(--parchment-warm) 40px
+        );
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── SPLIT LAYOUT ── */
+    .screen-split {
+      display: none;
+      opacity: 0;
+    }
+    .screen-split.active {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      opacity: 1;
+    }
+    .split-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px clamp(20px, 4vw, 48px);
+      border-right: 1px solid var(--rule-light);
+      background: #fff;
+      overflow-y: auto;
+    }
+    .split-right {
+      background: var(--parchment-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(24px, 4vw, 56px);
+      overflow: hidden;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--blue); margin-bottom: 10px;
+    }
+    .left-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(24px, 3vw, 32px); font-weight: 800;
+      letter-spacing: -0.02em; color: var(--ink);
+      margin-bottom: 12px; line-height: 1.15;
+    }
+    .left-title em { font-style: normal; color: var(--blue); }
+    .left-desc {
+      font-size: 15px; color: var(--ink-muted); line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* vertical step nav */
+    .vnav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      position: relative;
+    }
+    .vnav-item + .vnav-item { border-top: 1px solid var(--rule-light); }
+    .vnav-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--ink-faint); flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .vnav-item.active .vnav-num {
+      background: var(--blue); border-color: var(--blue); color: #fff;
+    }
+    .vnav-item.done .vnav-num {
+      background: var(--green); border-color: var(--green); color: #fff;
+    }
+    .vnav-label {
+      font-size: 14px; font-weight: 600; color: var(--ink-faint);
+      transition: color 0.3s; padding-top: 3px;
+    }
+    .vnav-item.active .vnav-label { color: var(--ink); }
+    .vnav-item.done .vnav-label { color: var(--green); }
+    .vnav-detail {
+      font-size: 12px; color: var(--ink-faint); line-height: 1.4;
+      margin-top: 2px; display: none;
+    }
+    .vnav-item.active .vnav-detail { display: block; color: var(--ink-muted); }
+
+    /* ── STEP CONTENT ── */
+    .step-content {
+      width: 100%;
+      max-width: 720px;
+      animation: stepIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .step-content.wide { max-width: 900px; }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BROWSER CHROME ── */
+    .browser {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06);
+      overflow: hidden;
+      width: 100%;
+    }
+    .browser-toolbar {
+      background: var(--paper);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--rule-light);
+    }
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .browser-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .browser-dot.r { background: #FF6058; }
+    .browser-dot.y { background: #FFBD2E; }
+    .browser-dot.g { background: #27CA40; }
+    .browser-url {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--rule-light);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink-faint);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .browser-url-lock {
+      color: var(--green);
+      flex-shrink: 0;
+    }
+    .browser-url-lock svg { width: 11px; height: 11px; display: block; }
+    .browser-url-text { overflow: hidden; text-overflow: ellipsis; }
+    .browser-body {
+      overflow: hidden;
+      height: 520px;
+    }
+
+    .card {
+      background: #fff;
+      overflow: hidden;
+    }
+
+    /* ── INTRO OVERLAY ── */
+    .intro-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      background: var(--parchment-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s, visibility 0.6s;
+      overflow: hidden;
+    }
+    /* grain texture */
+    .intro-overlay::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* ruled lines */
+    .intro-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 39px,
+          var(--parchment-warm) 39px,
+          var(--parchment-warm) 40px
+        );
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .intro-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .intro-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      text-align: left;
+      padding: 0 clamp(32px, 6vw, 80px);
+    }
+    .intro-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--blue);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .intro-eyebrow::before {
+      content: '';
+      width: 32px;
+      height: 2px;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+    .intro-headline {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(44px, 7vw, 80px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      line-height: 0.95;
+      margin-bottom: 32px;
+    }
+    .intro-headline em {
+      font-style: normal;
+      color: var(--blue);
+      display: block;
+      font-size: 1.15em;
+    }
+    .intro-body {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      margin-bottom: 48px;
+      max-width: 520px;
+    }
+    .intro-body strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .intro-launch {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      padding: 18px 40px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .intro-launch:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      transform: translateX(4px);
+    }
+    .intro-launch svg { width: 16px; height: 16px; }
+    .intro-fine {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--ink-faint);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .intro-fine svg {
+      width: 13px; height: 13px;
+      flex-shrink: 0;
+      color: var(--green);
+    }
+    /* decorative stamp */
+    .intro-stamp {
+      position: absolute;
+      top: clamp(40px, 8vh, 100px);
+      right: clamp(40px, 8vw, 120px);
+      width: 140px;
+      height: 140px;
+      border: 3px solid var(--blue);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-12deg);
+      opacity: 0.18;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .intro-stamp-text {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--blue);
+      line-height: 1.3;
+      text-align: center;
+    }
+    .intro-stamp-line {
+      width: 60%;
+      height: 2px;
+      background: var(--blue);
+      margin: 6px 0;
+    }
+    /* corner fold */
+    .intro-fold {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, transparent 50%, var(--parchment-warm) 50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    @media (max-width: 900px) {
+      .intro-stamp { display: none; }
+      .intro-fold { width: 50px; height: 50px; }
+    }
+
+    /* ── NARRATIVE INNER ── */
+    .narrative-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1060px;
+      width: 100%;
+      padding: 0 48px;
+      margin: 0 auto;
+    }
+    .narrative-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--blue);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .narrative-eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 2px;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+    .narrative-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 900;
+      color: var(--ink);
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      line-height: 1.15;
+    }
+    .narrative-bullets {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    .narrative-bullets li {
+      font-size: 16px;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      padding: 6px 0 6px 28px;
+      position: relative;
+    }
+    .narrative-bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--kraft);
+    }
+
+    /* ── EMAIL ANIMATION ── */
+    .email-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 18px; border-bottom: 1px solid var(--rule-light);
+      font-size: 13px; color: var(--ink-faint);
+      transition: background 0.2s;
+    }
+    .email-row.highlight { background: var(--blue-pale); color: var(--ink); }
+    .email-row.hovered { background: var(--paper-warm); }
+    .email-row-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--rule); flex-shrink: 0;
+    }
+    .email-row.highlight .email-row-dot { background: var(--blue); }
+    .email-row-from { font-weight: 600; min-width: 80px; flex-shrink: 0; }
+    .email-row-subject { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-row.highlight .email-row-subject { font-weight: 600; }
+    .email-row-time { font-size: 11px; color: var(--ink-faint); flex-shrink: 0; }
+
+    .email-open-header {
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--rule-light);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .email-open-from { display: flex; align-items: center; gap: 12px; }
+    .email-open-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #E8A230, #D4891A);
+      color: #fff; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .email-open-sender { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .email-open-sender span { font-weight: 400; color: var(--ink-faint); margin-left: 6px; font-size: 12px; }
+    .email-open-to { font-size: 12px; color: var(--ink-faint); }
+    .email-open-time { font-size: 12px; color: var(--ink-faint); }
+    .email-open-body { padding: 0; }
+
+    .email-promo {
+      padding: 20px 32px 16px;
+      text-align: center;
+      background: #fff;
+    }
+    .email-promo-amount {
+      font-family: 'Outfit', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 4px;
+    }
+    .email-promo-divider {
+      width: 140px;
+      height: 3px;
+      background: var(--ink);
+      margin: 0 auto 8px;
+    }
+    .email-promo-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .email-promo-sub {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .email-promo-text {
+      font-size: 12px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      max-width: 300px;
+      margin: 0 auto 14px;
+    }
+    .email-promo-cta {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--ink);
+      border: none;
+      border-radius: 6px;
+      padding: 10px 30px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .email-promo-cta:hover { background: var(--ink-soft); }
+    .email-promo-cta.hovered { background: var(--ink-soft); transform: translateY(-1px); }
+    .email-promo-footer {
+      padding: 8px 20px;
+      border-top: 1px solid var(--rule-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .email-promo-footer-brand {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .email-promo-footer-text {
+      font-size: 11px; color: var(--ink-faint);
+    }
+
+    .fake-cursor {
+      position: absolute;
+      width: 24px; height: 24px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      filter: drop-shadow(0 2px 4px rgba(43,92,255,0.3));
+    }
+    .fake-cursor.visible { opacity: 1; }
+    .fake-cursor-ring {
+      position: absolute;
+      top: -6px; left: -6px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(43,92,255,0.3);
+      background: rgba(43,92,255,0.06);
+      animation: cursorPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes cursorPulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 0.3; }
+    }
+
+    /* ── STORE ICON ── */
+    .store-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #E8A230, #D4891A);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+    }
+
+    /* ── STEP 1: LINK PAGE ── */
+    .link-page {
+      background: var(--blue-pale);
+      padding: 28px 36px 20px;
+      text-align: center;
+      height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .link-page-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .link-page-brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .link-page-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .link-page-desc {
+      font-size: 14px;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      max-width: 360px;
+      margin: 0 auto 20px;
+    }
+    .link-page-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px 20px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+    .link-page-amazon { margin-bottom: 20px; }
+    .link-page-options {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+    .link-page-radio {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .radio-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s;
+    }
+    .radio-circle.checked { border-color: var(--blue); }
+    .radio-circle.checked::after {
+      content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--blue);
+    }
+    .link-page-connect {
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 700; color: #fff;
+      background: var(--ink); border: none; border-radius: 50px;
+      padding: 14px; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .link-page-connect:hover { background: var(--ink-soft); transform: translateY(-1px); }
+    .link-page-trust { font-size: 12px; color: var(--ink-muted); }
+    .link-page-trust strong { font-style: italic; color: var(--ink-soft); }
+    .link-page-trust a { color: var(--blue); text-decoration: none; }
+    .link-page-trust a:hover { text-decoration: underline; }
+
+    /* ── STEP 2: LOGIN ── */
+    .login-header { padding: 24px 36px 0; text-align: center; }
+    .amazon-mark { display: inline-block; margin-bottom: 12px; }
+    .amazon-mark svg { height: 28px; }
+    .login-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px;
+    }
+    .login-desc { font-size: 14px; color: var(--ink-muted); margin-bottom: 20px; }
+    .login-form { padding: 0 36px 24px; }
+    .field { margin-bottom: 14px; }
+    .field:last-of-type { margin-bottom: 20px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+    .field input {
+      width: 100%; font-family: 'DM Sans', sans-serif; font-size: 15px;
+      padding: 12px 16px; border: 1.5px solid var(--rule); border-radius: 9px;
+      background: #fff; color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43,92,255,0.08); }
+    .field input::placeholder { color: var(--ink-faint); }
+    .login-trust {
+      padding: 12px 36px;
+      border-top: 1px solid var(--rule-light);
+      text-align: center; font-size: 12px; color: var(--ink-faint);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .login-trust svg { width: 13px; height: 13px; color: var(--green); flex-shrink: 0; }
+
+    /* ── OTP ── */
+    .otp-bg {
+      height: 520px;
+      background: #9A9A9A;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 28px 24px;
+    }
+    .otp-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .otp-card {
+      background: #fff; border-radius: 12px;
+      width: 100%; max-width: 380px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    .otp-card-header {
+      padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 15px; font-weight: 600; color: var(--ink);
+      border-bottom: 1px solid var(--rule-light);
+    }
+    .otp-close { font-size: 20px; color: var(--ink-faint); cursor: default; }
+    .otp-card-body { padding: 24px 20px; }
+    .otp-title {
+      font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700;
+      color: var(--blue); margin-bottom: 8px;
+    }
+    .otp-subtitle {
+      font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700;
+      color: var(--ink); margin-bottom: 8px;
+    }
+    .otp-text { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 16px; }
+
+    /* ── LINKING ── */
+    .linking-screen {
+      height: 520px; background: var(--blue-pale);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 28px 32px; text-align: center;
+    }
+    .linking-title {
+      font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700;
+      color: var(--ink); margin-bottom: 6px;
+    }
+    .linking-desc { font-size: 14px; color: var(--ink-muted); margin-bottom: 24px; max-width: 340px; }
+    .linking-logo {
+      position: relative; width: 120px; height: 120px;
+      background: transparent;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    }
+    .linking-sparkles { position: absolute; inset: 0; }
+    .sparkle {
+      position: absolute; width: 6px; height: 6px;
+      background: var(--blue); border-radius: 50%;
+      animation: sparkleAnim 2s ease-in-out infinite;
+    }
+    @keyframes sparkleAnim {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    .linking-status {
+      font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .linking-progress {
+      width: 100%; max-width: 320px; height: 6px;
+      background: var(--rule); border-radius: 3px; margin-bottom: 20px; overflow: hidden;
+    }
+    .linking-progress-fill {
+      height: 100%; background: var(--blue); border-radius: 3px;
+      width: 0%; transition: width 0.6s ease;
+    }
+    .linking-steps { display: flex; gap: 24px; }
+    .linking-step {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--ink-faint); font-weight: 500;
+    }
+    .linking-step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 13px;
+      color: var(--ink-faint); transition: all 0.3s;
+    }
+    .linking-step.active .linking-step-num { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .linking-step.active { color: var(--blue); font-weight: 600; }
+    .linking-step.done .linking-step-num { background: var(--green); border-color: var(--green); color: #fff; }
+    .linking-step.done { color: var(--green); }
+
+    /* ── STEP 3: CONNECTED ── */
+    .connected-body { padding: 36px 36px 28px; text-align: center; }
+    .connected-check {
+      width: 64px; height: 64px; margin: 0 auto 20px;
+      background: var(--green-pale); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .connected-check svg { width: 28px; height: 28px; color: var(--green); }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .connected-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px; font-weight: 700; color: var(--ink); margin-bottom: 8px;
+    }
+    .connected-desc {
+      font-size: 14px; color: var(--ink-muted); line-height: 1.6;
+      margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto;
+    }
+    .connected-confirm {
+      background: var(--parchment-light); border: 1px solid var(--rule-light);
+      border-radius: 10px; padding: 16px 24px; margin-bottom: 16px; display: inline-block;
+    }
+    .connected-confirm-label {
+      font-size: 12px; color: var(--ink-faint); text-transform: uppercase;
+      letter-spacing: 0.06em; font-family: 'JetBrains Mono', monospace;
+      font-weight: 500; margin-bottom: 4px;
+    }
+    .connected-confirm-code {
+      font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700;
+      color: var(--ink); letter-spacing: 0.08em;
+    }
+
+    /* ── DATA VIEW ── */
+    .data-header {
+      display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;
+    }
+    .data-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--blue); margin-bottom: 6px;
+    }
+    .data-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(20px, 3vw, 26px); font-weight: 700;
+      color: var(--ink); letter-spacing: -0.02em;
+    }
+    .data-meta { font-size: 12px; color: var(--ink-faint); font-weight: 500; }
+    .data-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 10px; margin-bottom: 16px;
+    }
+    .kpi {
+      background: #fff; border: 1px solid var(--rule-light);
+      border-radius: 10px; padding: 14px 14px;
+    }
+    .kpi-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 2px;
+    }
+    .kpi-lbl { font-size: 11px; color: var(--ink-faint); font-weight: 500; }
+    .data-table {
+      background: #fff; border: 1px solid var(--rule-light);
+      border-radius: 10px; overflow: hidden; margin-bottom: 12px;
+    }
+    .dt-head {
+      display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 0.8fr;
+      padding: 10px 16px;
+      background: var(--parchment-light); border-bottom: 1px solid var(--rule-light);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint);
+    }
+    .dt-row {
+      display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 0.8fr;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--rule-light);
+      font-size: 13px; color: var(--ink-soft); align-items: center;
+      transition: background 0.15s;
+    }
+    .dt-row:last-child { border-bottom: none; }
+    .dt-row:hover { background: var(--parchment-light); }
+    .dt-product { font-weight: 500; color: var(--ink); }
+    .dt-cat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500; color: var(--blue);
+      background: var(--blue-dim); padding: 3px 8px; border-radius: 4px; display: inline-block;
+    }
+    .dt-price { font-weight: 500; }
+    .dt-date { color: var(--ink-faint); font-size: 12px; }
+    .insight-bar {
+      background: var(--parchment-light); border: 1px solid var(--parchment-warm);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; gap: 12px;
+      font-size: 13px; line-height: 1.55; color: var(--ink-muted);
+    }
+    .insight-icon {
+      width: 32px; height: 32px; background: var(--blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .insight-icon svg { width: 16px; height: 16px; color: #fff; }
+    .insight-bar strong { color: var(--ink); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600;
+      border: none; border-radius: 10px;
+      padding: 13px 28px; cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+    }
+    .btn-dark { background: var(--ink); color: #fff; }
+    .btn-dark:hover { background: var(--ink-soft); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .btn svg { width: 16px; height: 16px; }
+
+    /* ── CONFETTI ── */
+    .confetti-container {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 1000; overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute; top: -20px;
+      animation: confettiFall var(--duration) ease-in forwards;
+      animation-delay: var(--delay);
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      70% { opacity: 1; }
+      100% { transform: translateY(100vh) rotate(var(--spin)) scale(0.6); opacity: 0; }
+    }
+
+    /* ── NAV BUTTONS ── */
+    .step-nav-btn {
+      position: fixed;
+      bottom: 32px;
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 1px solid var(--rule); background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      color: var(--ink-muted); z-index: 40;
+    }
+    .step-nav-btn:hover {
+      background: var(--ink); border-color: var(--ink); color: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); transform: scale(1.05);
+    }
+    .step-nav-btn:disabled {
+      opacity: 0.3; cursor: default; pointer-events: none;
+    }
+    .step-nav-btn svg { width: 22px; height: 22px; }
+    #navPrev { left: 32px; }
+    #navNext {
+      right: 32px;
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #navNext:hover { transform: translateY(-50%) scale(1.05); }
+    #navNext.narrative-pos {
+      right: 32px;
+    }
+    @keyframes nudgePulse {
+      0%, 100% { box-shadow: 0 0 0 0px rgba(43,92,255,0.4), 0 2px 12px rgba(0,0,0,0.08); }
+      50% { box-shadow: 0 0 0 14px rgba(43,92,255,0), 0 2px 12px rgba(0,0,0,0.08); }
+    }
+    .step-nav-btn.nudge {
+      animation: nudgePulse 1.4s ease-out infinite;
+      background: var(--blue); border-color: var(--blue); color: #fff;
+      width: 64px; height: 64px;
+    }
+    .step-nav-btn.nudge svg { width: 26px; height: 26px; }
+
+    /* ── TUTORIAL SPOTLIGHT ── */
+    .tutorial-dim {
+      position: fixed; inset: 0;
+      background: rgba(10, 10, 10, 0.45);
+      z-index: 30; opacity: 0; visibility: hidden;
+      transition: opacity 0.4s, visibility 0.4s;
+      pointer-events: none;
+    }
+    .tutorial-dim.visible { opacity: 1; visibility: visible; }
+    .tutorial-prompt {
+      position: fixed; z-index: 32; bottom: 80px;
+      background: #fff; border-radius: 10px; padding: 14px 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 10px;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.4s 0.2s, visibility 0.4s 0.2s, transform 0.4s 0.2s;
+      transform: translateY(8px);
+      pointer-events: none;
+      left: calc(380px + (100vw - 380px) / 2);
+      transform: translateX(-50%) translateY(8px);
+    }
+    .tutorial-prompt.visible {
+      opacity: 1; visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    .tutorial-prompt-icon {
+      width: 28px; height: 28px; background: var(--blue); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .tutorial-prompt-icon svg { width: 14px; height: 14px; color: #fff; }
+    .tutorial-prompt-text { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .tutorial-prompt-text span { font-weight: 400; color: var(--ink-muted); }
+    .step-content.spotlit { position: relative; z-index: 31; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      html, body { overflow: auto; overflow-x: hidden; }
+      .main-area { height: auto; min-height: calc(100vh - 56px); overflow: auto; }
+      .screen { position: relative; }
+      .screen-narrative { min-height: calc(100vh - 56px); }
+
+      /* narrative layout — stack vertically */
+      .screen-narrative .narrative-inner {
+        flex-direction: column !important;
+        padding: 6vh 24px 100px !important;
+        gap: 28px !important;
+        align-items: stretch !important;
+      }
+      .screen-narrative .narrative-inner > div:first-child { min-width: 0 !important; }
+      .screen-narrative .narrative-inner > div:last-child { flex: 1 1 auto !important; max-width: 100% !important; }
+
+      /* split layout */
+      .screen-split.active { grid-template-columns: 1fr; }
+      .split-left {
+        position: static; height: auto; padding: 24px;
+        border-right: none; border-bottom: 1px solid var(--rule-light);
+      }
+      .split-right { min-height: auto; padding: 20px; }
+      .vnav { display: none; }
+
+      /* browser chrome — fluid height */
+      .browser-body { height: auto; min-height: 360px; max-height: 520px; }
+
+      /* step content */
+      .step-content, .step-content.wide { max-width: 100%; }
+      .link-page { height: auto; min-height: 360px; padding: 24px 20px 20px; }
+      .otp-bg { height: auto; min-height: 360px; padding: 24px 16px; }
+      .linking-screen { height: auto; min-height: 360px; padding: 24px 20px; }
+
+      /* data table — scroll horizontally */
+      .data-kpis { grid-template-columns: repeat(2, 1fr); }
+      .data-table { overflow-x: auto; }
+      .dt-head, .dt-row { min-width: 500px; }
+
+      /* nav buttons */
+      #navPrev { left: 16px; bottom: 20px; width: 48px; height: 48px; }
+      #navNext { right: 16px; top: auto; bottom: 20px; transform: none; width: 48px; height: 48px; }
+      #navNext:hover { transform: scale(1.05); }
+      #navNext.narrative-pos { right: 16px; }
+      .step-nav-btn.nudge { width: 56px; height: 56px; }
+
+      /* tutorial prompt — center on screen */
+      .tutorial-prompt {
+        left: 50% !important;
+        transform: translateX(-50%) translateY(8px);
+        bottom: 70px;
+      }
+      .tutorial-prompt.visible { transform: translateX(-50%) translateY(0); }
+
+      /* topbar compact */
+      .topbar { padding: 0 16px; height: 48px; }
+      .topbar-label { display: none; }
+      .topbar-sep { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .intro-headline { font-size: clamp(32px, 10vw, 48px); }
+      .intro-content { padding: 0 20px; }
+      .intro-launch { padding: 16px 28px; font-size: 14px; }
+      .narrative-title { font-size: clamp(22px, 6vw, 32px); }
+      .narrative-bullets li { font-size: 14px; }
+      .link-page-brand-name { font-size: 20px; }
+      .link-page-title { font-size: 18px; }
+      .link-page-options { gap: 16px; }
+      .email-promo-amount { font-size: 40px; }
+      .data-kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .kpi { padding: 10px; }
+      .kpi-val { font-size: 18px; }
+      .connected-title { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="ario-logo-black.png" alt="Ario" class="topbar-logo">
+    <div class="topbar-sep"></div>
+    <span class="topbar-label">See Ario in Action</span>
+  </div>
+  <a href="https://ariodata.com" class="topbar-back">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5"/></svg>
+    Back to ariodata.com
+  </a>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main-area">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 0: INTRO OVERLAY                -->
+<!-- ═══════════════════════════════════════ -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-stamp">
+    <span class="intro-stamp-text">Live</span>
+    <div class="intro-stamp-line"></div>
+    <span class="intro-stamp-text">Demo</span>
+  </div>
+  <div class="intro-fold"></div>
+  <div class="intro-content">
+    <div class="intro-headline">Don't take our word for it.<em>See it yourself.</em></div>
+    <div class="intro-body">Connect your Amazon account and watch purchase data flow in under 15 seconds — <strong>with your own data.</strong></div>
+    <button class="intro-launch" onclick="launchDemo()">
+      See Ario in Action
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    </button>
+    <div class="intro-fine">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg>
+      Your credentials are never stored. Connection uses secure tokens.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 1: NARRATIVE — SETTING THE STAGE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen screen-narrative" id="screen-narrative" style="display:none;opacity:0;">
+  <div class="narrative-inner" style="display:flex;gap:48px;align-items:flex-start;padding-top:10vh;">
+    <div style="flex:1;min-width:400px;">
+      <div class="narrative-eyebrow">The scenario</div>
+      <div class="narrative-title">Setting the stage</div>
+      <ul class="narrative-bullets">
+        <li>Circuit Shack sends a promotional email offering $25 store credit for linking an Amazon account</li>
+        <li>Customer clicks through and accepts the offer</li>
+      </ul>
+    </div>
+    <div style="flex:0 0 480px;" id="narrativeBrowserWrap">
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
+          <div class="browser-url">
+            <span class="browser-url-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg></span>
+            <span class="browser-url-text">mail.google.com/mail/u/0/#inbox</span>
+          </div>
+        </div>
+        <div class="browser-body">
+          <div class="card" style="position:relative;height:520px;" id="emailCard">
+            <!-- Inbox view -->
+            <div id="inboxView" style="height:100%;display:flex;flex-direction:column;">
+              <div class="email-row" data-row="1">
+                <span class="email-row-dot"></span>
+                <span class="email-row-from">Spotify</span>
+                <span class="email-row-subject">Your 2026 Wrapped is here...</span>
+                <span class="email-row-time">2d</span>
+              </div>
+              <div class="email-row" data-row="2">
+                <span class="email-row-dot"></span>
+                <span class="email-row-from">Amazon</span>
+                <span class="email-row-subject">Your order has shipped — tracking inside</span>
+                <span class="email-row-time">5h</span>
+              </div>
+              <div class="email-row highlight" data-row="3" id="circuitshackRow">
+                <span class="email-row-dot"></span>
+                <span class="email-row-from">Circuit Shack</span>
+                <span class="email-row-subject">Get $25 off your next Circuit Shack order</span>
+                <span class="email-row-time">1h</span>
+              </div>
+              <div class="email-row" data-row="4">
+                <span class="email-row-dot"></span>
+                <span class="email-row-from">DoorDash</span>
+                <span class="email-row-subject">Your favorites are on sale this week</span>
+                <span class="email-row-time">1d</span>
+              </div>
+              <div class="email-row" data-row="5">
+                <span class="email-row-dot"></span>
+                <span class="email-row-from">GitHub</span>
+                <span class="email-row-subject">Security alert: new sign-in detected</span>
+                <span class="email-row-time">3d</span>
+              </div>
+            </div>
+
+            <!-- Opened email -->
+            <div id="emailOpenView" style="display:none;height:100%;overflow:hidden;">
+              <div class="email-open-header">
+                <div class="email-open-from">
+                  <div class="email-open-avatar">C</div>
+                  <div>
+                    <div class="email-open-sender">Circuit Shack <span>deals@circuitshack.com</span></div>
+                    <div class="email-open-to">to me</div>
+                  </div>
+                </div>
+                <div class="email-open-time">Today, 2:34 PM</div>
+              </div>
+              <div class="email-open-body">
+                <div class="email-promo">
+                  <div class="email-promo-amount">$25</div>
+                  <div class="email-promo-divider"></div>
+                  <div class="email-promo-label">STORE CREDIT</div>
+                  <div class="email-promo-sub">WHEN YOU LINK YOUR AMAZON ACCOUNT</div>
+                  <div class="email-promo-text">Share with us the tech you've purchased on Amazon, and we will send you a $25 reward to spend at Circuit Shack!</div>
+                  <button class="email-promo-cta" id="emailCta">Link Now</button>
+                </div>
+                <div class="email-promo-footer">
+                  <div class="email-promo-footer-brand">
+                    <div class="store-icon" style="width:24px;height:24px;border-radius:6px;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft);">Circuit Shack</span>
+                  </div>
+                  <div class="email-promo-footer-text">Powered by Ario &middot; Your data is encrypted and never shared without consent.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Animated cursor -->
+            <div class="fake-cursor" id="fakeCursor">
+              <div class="fake-cursor-ring"></div>
+              <svg viewBox="0 0 24 24" fill="#2B5CFF" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-5.07h6.78c.48 0 .66-.63.25-.88L5.96 3.01c-.3-.18-.46.01-.46.2z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 2: SPLIT — STEPS 1, 2, 3       -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen screen-split" id="screen-split" style="display:none;opacity:0;">
+
+  <!-- LEFT PANEL -->
+  <div class="split-left">
+    <div class="left-eyebrow" id="leftEyebrow">Value exchange</div>
+    <div class="left-title" id="leftTitle">Accept the <em>Offer</em></div>
+    <div class="left-desc" id="leftDesc">The retailer presents a value exchange — store credit, VIP access, or personalized deals — in return for a quick data connection.</div>
+
+    <div class="vnav">
+      <div class="vnav-item active" data-step="1">
+        <span class="vnav-num">1</span>
+        <div><div class="vnav-label">Accept the Offer</div><div class="vnav-detail">Value exchange — credit, perks, or VIP access</div></div>
+      </div>
+      <div class="vnav-item" data-step="2">
+        <span class="vnav-num">2</span>
+        <div><div class="vnav-label">Customer Links</div><div class="vnav-detail">Secure sign-in, 2FA, and data retrieval</div></div>
+      </div>
+      <div class="vnav-item" data-step="3">
+        <span class="vnav-num">3</span>
+        <div><div class="vnav-label">Connected</div><div class="vnav-detail">Account linked, reward confirmed</div></div>
+      </div>
+      <div class="vnav-item" data-step="4">
+        <span class="vnav-num">4</span>
+        <div><div class="vnav-label">Data View</div><div class="vnav-detail">SKU-level insights ready to use</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="split-right">
+
+    <!-- STEP 1: PRESENT THE OFFER -->
+    <div class="step-content" id="step-1" style="display:block;">
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
+          <div class="browser-url">
+            <span class="browser-url-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg></span>
+            <span class="browser-url-text">circuitshack.com/link-account</span>
+          </div>
+        </div>
+        <div class="browser-body">
+          <div class="link-page">
+            <div class="link-page-brand">
+              <div class="store-icon" style="width:40px;height:40px;border-radius:10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <span class="link-page-brand-name">circuit shack</span>
+            </div>
+            <div class="link-page-title">Link Your Account</div>
+            <div class="link-page-desc">Get $25 store credit and exclusive personalized perks at Circuit Shack when you link your Amazon Account!</div>
+            <div class="link-page-card">
+              <div class="link-page-amazon">
+                <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:30px;">
+                  <text x="10" y="26" font-family="'Outfit', sans-serif" font-weight="800" font-size="28" fill="#232F3E">amazon</text>
+                  <path d="M30 30 Q50 36 82 30" stroke="#FF9900" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <path d="M80 28 L82 30 L78 30" fill="#FF9900"/>
+                </svg>
+              </div>
+              <div class="link-page-options">
+                <label class="link-page-radio selected" onclick="selectRegion(this)">
+                  <span class="radio-circle checked"></span>
+                  Amazon US
+                </label>
+                <label class="link-page-radio" onclick="selectRegion(this)">
+                  <span class="radio-circle"></span>
+                  Amazon CA
+                </label>
+              </div>
+              <button class="link-page-connect" onclick="goToStep(2)">Connect</button>
+            </div>
+            <div class="link-page-trust">
+              <strong>Secured by Ario.</strong> By linking your account, you agree to our <a href="#">Privacy Policy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: CUSTOMER LINKS (multi-phase) -->
+    <div class="step-content" id="step-2" style="display:none;">
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
+          <div class="browser-url">
+            <span class="browser-url-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg></span>
+            <span class="browser-url-text">connect.ariodata.com/circuitshack/amazon</span>
+          </div>
+        </div>
+        <div class="browser-body">
+          <div class="card" style="position:relative;" id="step2Card">
+
+            <!-- Phase A: Sign in -->
+            <div id="loginPhase" style="height:100%;display:flex;flex-direction:column;">
+              <div class="login-header">
+                <div class="amazon-mark">
+                  <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="26" font-family="'Outfit', sans-serif" font-weight="800" font-size="28" fill="#232F3E">amazon</text>
+                    <path d="M20 30 Q40 36 72 30" stroke="#FF9900" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <path d="M70 28 L72 30 L68 30" fill="#FF9900"/>
+                  </svg>
+                </div>
+                <div class="login-title">Sign in to Amazon</div>
+                <div class="login-desc">Enter your credentials to securely link your account.</div>
+              </div>
+              <div class="login-form">
+                <div class="field">
+                  <label>Email or phone number</label>
+                  <input type="text" placeholder="your@email.com" id="in-email">
+                </div>
+                <div class="field">
+                  <label>Password</label>
+                  <input type="password" placeholder="Your Amazon password" id="in-pass">
+                </div>
+                <button class="btn btn-dark" onclick="showOTP()">
+                  Sign in &amp; Connect
+                </button>
+              </div>
+              <div class="login-trust">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/><circle cx="8" cy="11" r="1"/></svg>
+                Powered by Ario. We never store your password.
+              </div>
+            </div>
+
+            <!-- Phase B: 2FA / OTP -->
+            <div id="otpPhase" style="display:none;height:100%;">
+              <div class="otp-bg">
+                <div class="otp-brand">
+                  <div class="store-icon" style="width:36px;height:36px;border-radius:8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  </div>
+                  <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:20px;color:var(--ink);">circuit shack</span>
+                </div>
+                <div class="otp-card">
+                  <div class="otp-card-header">
+                    <span>Sign in to Amazon</span>
+                    <span class="otp-close">&times;</span>
+                  </div>
+                  <div class="otp-card-body">
+                    <div class="otp-title">Amazon Verification</div>
+                    <div class="otp-subtitle">Enter verification code</div>
+                    <div class="otp-text">For your security, we've sent the code to your phone ***-***-**91.</div>
+                    <div class="field" style="margin-bottom:16px;">
+                      <input type="text" placeholder="OTP" id="in-otp">
+                    </div>
+                    <button class="btn btn-dark" onclick="startConnect()">Submit code</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phase C: Loading / Linking -->
+            <div id="linkingPhase" style="display:none;height:100%;">
+              <div class="linking-screen">
+                <div class="linking-title">Linking Your Account</div>
+                <div class="linking-desc">Please wait while we connect to Amazon and retrieve your information</div>
+                <div class="linking-logo">
+                  <img src="amazon-icon.webp" alt="Amazon" style="width:70px;height:70px;object-fit:contain;">
+                  <div class="linking-sparkles">
+                    <div class="sparkle" style="top:15%;left:30%;animation-delay:0s;"></div>
+                    <div class="sparkle" style="top:60%;right:25%;animation-delay:0.4s;"></div>
+                    <div class="sparkle" style="top:40%;right:15%;animation-delay:0.8s;"></div>
+                    <div class="sparkle" style="bottom:20%;left:25%;animation-delay:1.2s;"></div>
+                  </div>
+                </div>
+                <div class="linking-status" id="linkingStatus">Connecting to Amazon...</div>
+                <div class="linking-progress">
+                  <div class="linking-progress-fill" id="linkingFill"></div>
+                </div>
+                <div class="linking-steps">
+                  <div class="linking-step active" id="lk-1"><span class="linking-step-num">1</span><span>Connect</span></div>
+                  <div class="linking-step" id="lk-2"><span class="linking-step-num">2</span><span>Extract</span></div>
+                  <div class="linking-step" id="lk-3"><span class="linking-step-num">3</span><span>Load</span></div>
+                  <div class="linking-step" id="lk-4"><span class="linking-step-num">4</span><span>Complete</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONNECTED -->
+    <div class="step-content" id="step-3" style="display:none;">
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
+          <div class="browser-url">
+            <span class="browser-url-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg></span>
+            <span class="browser-url-text">connect.ariodata.com/circuitshack/success</span>
+          </div>
+        </div>
+        <div class="browser-body">
+          <div class="card">
+            <div class="connected-body">
+              <div class="connected-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              </div>
+              <div class="connected-title">Thank you for linking your Amazon account!</div>
+              <div class="connected-confirm">
+                <div class="connected-confirm-label">Confirmation code</div>
+                <div class="connected-confirm-code">23E372</div>
+              </div>
+              <div class="connected-desc">We will email you your $25 coupon code within the next 24 hours. Keep an eye on your inbox!</div>
+              <button class="btn-blue" onclick="goToPhase(5)" style="position:absolute;bottom:20px;right:20px;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;padding:10px 20px;cursor:pointer;transition:all 0.2s;">
+                See my data
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px;"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: DATA VIEW -->
+    <div id="step-4" style="display:none;width:100%;max-width:900px;">
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
+          <div class="browser-url">
+            <span class="browser-url-lock"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7V5a3 3 0 116 0v2"/><rect x="3" y="7" width="10" height="7" rx="1.5"/></svg></span>
+            <span class="browser-url-text">dashboard.circuitshack.com/customers/insights</span>
+          </div>
+        </div>
+        <div class="browser-body" style="height:auto;max-height:520px;overflow-y:auto;padding:16px;">
+          <div class="data-header">
+            <div>
+              <div class="data-eyebrow">Ario Data View &middot; Customer #3151</div>
+              <div class="data-title">Electronics Purchase History</div>
+            </div>
+            <div class="data-meta">Amazon &middot; Last 12 months</div>
+          </div>
+          <div class="data-kpis">
+            <div class="kpi"><div class="kpi-val">$2,847</div><div class="kpi-lbl">Total Spend</div></div>
+            <div class="kpi"><div class="kpi-val">23</div><div class="kpi-lbl">Orders</div></div>
+            <div class="kpi"><div class="kpi-val">$124</div><div class="kpi-lbl">Avg Order</div></div>
+            <div class="kpi"><div class="kpi-val">7</div><div class="kpi-lbl">Categories</div></div>
+          </div>
+          <div class="data-table">
+            <div class="dt-head"><span>Product</span><span>Category</span><span>Price</span><span>Date</span></div>
+            <div class="dt-row"><span class="dt-product">Sony WH-1000XM5 Headphones</span><span><span class="dt-cat">Audio</span></span><span class="dt-price">$348.00</span><span class="dt-date">Feb 2026</span></div>
+            <div class="dt-row"><span class="dt-product">Apple iPad Air M2 (256GB)</span><span><span class="dt-cat">Tablets</span></span><span class="dt-price">$599.00</span><span class="dt-date">Jan 2026</span></div>
+            <div class="dt-row"><span class="dt-product">Anker 737 Power Bank</span><span><span class="dt-cat">Accessories</span></span><span class="dt-price">$109.99</span><span class="dt-date">Jan 2026</span></div>
+            <div class="dt-row"><span class="dt-product">LG C3 55" OLED TV</span><span><span class="dt-cat">TV &amp; Display</span></span><span class="dt-price">$1,096.99</span><span class="dt-date">Dec 2025</span></div>
+            <div class="dt-row"><span class="dt-product">Logitech MX Master 3S</span><span><span class="dt-cat">Peripherals</span></span><span class="dt-price">$99.99</span><span class="dt-date">Nov 2025</span></div>
+            <div class="dt-row"><span class="dt-product">Samsung T7 2TB SSD</span><span><span class="dt-cat">Storage</span></span><span class="dt-price">$149.99</span><span class="dt-date">Oct 2025</span></div>
+            <div class="dt-row"><span class="dt-product">Google Nest Hub Max</span><span><span class="dt-cat">Smart Home</span></span><span class="dt-price">$229.99</span><span class="dt-date">Sep 2025</span></div>
+          </div>
+          <div class="insight-bar">
+            <div class="insight-icon">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v1M8 13v1M2 8h1M13 8h1M4.2 4.2l.7.7M11.1 11.1l.7.7M4.2 11.8l.7-.7M11.1 4.9l.7-.7"/><circle cx="8" cy="8" r="3"/></svg>
+            </div>
+            <div>
+              <strong>Ario Insight:</strong> This customer over-indexes on premium audio and display — 51% of spend in two categories. High likelihood to convert on home theater bundles.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /split-right -->
+</div><!-- /screen-split -->
+
+</div><!-- /main-area -->
+
+<!-- TUTORIAL SPOTLIGHT -->
+<div class="tutorial-dim" id="tutorialDim"></div>
+<div class="tutorial-prompt" id="tutorialPrompt">
+  <div class="tutorial-prompt-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h8M8 4l4 4-4 4"/></svg>
+  </div>
+  <div class="tutorial-prompt-text" id="tutorialText">Your turn</div>
+</div>
+
+<!-- NAV BUTTONS -->
+<button class="step-nav-btn" id="navPrev" onclick="goPrev()" disabled style="display:none;">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5"/></svg>
+</button>
+<button class="step-nav-btn" id="navNext" onclick="goNext()" style="display:none;">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg>
+</button>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+// Logical flow:
+//   phase 0 = intro overlay
+//   phase 1 = narrative (stage-setter) — full-width, email anim loops
+//   phase 2 = step 1 (present the offer) — split, interactive
+//   phase 3 = step 2 (customer links) — split, interactive
+//   phase 4 = step 3 (connected) — split, NOT interactive
+//   phase 5 = step 4 (data view) — narrative, NOT interactive
+
+var currentPhase = 0;
+var emailAnimTimer = null;
+var nudgeTimer = null;
+
+var phases = {
+  0: { screen: null, interactive: false },
+  1: { screen: 'screen-narrative', interactive: false, step: null },
+  2: { screen: 'screen-split', step: 1, interactive: true,
+       eyebrow: 'Value exchange', title: 'Accept the <em>Offer</em>',
+       desc: 'The retailer presents a value exchange — store credit, VIP access, or personalized deals — in return for a quick data connection.' },
+  3: { screen: 'screen-split', step: 2, interactive: true,
+       eyebrow: 'Secure authentication', title: 'Customer <em>Links</em>',
+       desc: 'The customer signs in to Amazon. Ario handles the secure connection, 2FA, and data retrieval behind the scenes.' },
+  4: { screen: 'screen-split', step: 3, interactive: true,
+       eyebrow: 'Confirmation', title: '<em>Connected</em>',
+       desc: 'The account is linked. Verified purchase data begins streaming into your systems immediately.' },
+  5: { screen: 'screen-split', step: 4, interactive: false,
+       eyebrow: 'Actionable intelligence', title: 'Data <em>flows in</em>',
+       desc: 'SKU-level transaction data, filtered by category, ready for your CRM, personalization engine, or analytics stack.' }
+};
+
+// ═══════════════════════════════════════
+// LAUNCH
+// ═══════════════════════════════════════
+function launchDemo() {
+  document.getElementById('introOverlay').classList.add('hidden');
+  setTimeout(function() {
+    goToPhase(1);
+  }, 600);
+}
+
+// ═══════════════════════════════════════
+// SCREEN TRANSITIONS
+// ═══════════════════════════════════════
+function hideAllScreens() {
+  ['screen-narrative', 'screen-split'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'none';
+    el.style.opacity = '0';
+    el.classList.remove('active');
+  });
+}
+
+function showScreen(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = '';
+  el.classList.add('active');
+  el.offsetHeight;
+  el.style.opacity = '1';
+}
+
+// ═══════════════════════════════════════
+// GO TO PHASE
+// ═══════════════════════════════════════
+function goToPhase(n) {
+  if (n < 1 || n > 5) return;
+  currentPhase = n;
+  var cfg = phases[n];
+
+  hideAllScreens();
+
+  if (cfg.screen) {
+    showScreen(cfg.screen);
+  }
+
+  // If split, show the right step content
+  if (cfg.screen === 'screen-split' && cfg.step) {
+    [1, 2, 3, 4].forEach(function(s) {
+      var el = document.getElementById('step-' + s);
+      el.style.display = 'none';
+      el.style.animation = 'none';
+      el.classList.remove('spotlit');
+    });
+    var stepEl = document.getElementById('step-' + cfg.step);
+    stepEl.style.display = 'block';
+    stepEl.style.animation = '';
+
+    // Update left panel
+    document.getElementById('leftEyebrow').innerHTML = cfg.eyebrow;
+    document.getElementById('leftTitle').innerHTML = cfg.title;
+    document.getElementById('leftDesc').textContent = cfg.desc;
+
+    // Update vnav
+    document.querySelectorAll('.vnav-item').forEach(function(el) {
+      var s = parseInt(el.getAttribute('data-step'));
+      el.classList.remove('active', 'done');
+      if (s < cfg.step) el.classList.add('done');
+      if (s === cfg.step) el.classList.add('active');
+    });
+  }
+
+  // Email animation
+  if (n === 1) {
+    setTimeout(startEmailAnim, 400);
+  } else {
+    stopEmailAnim();
+  }
+
+  // Confetti on connected (phase 4)
+  if (n === 4) {
+    fireConfetti();
+    // Pulse the next button after confetti settles
+    setTimeout(function() {
+      var btn = document.getElementById('navNext');
+      if (btn) btn.classList.add('nudge');
+    }, 1500);
+  }
+
+  clearNudge();
+
+  // Tutorial for interactive steps
+  if (cfg.interactive) {
+    showTutorial(n);
+  }
+
+  // Nudge on narrative
+  if (n === 1) {
+    scheduleNudge();
+  }
+
+  updateNavButtons();
+}
+
+// Called from in-page buttons
+function goToStep(stepNum) {
+  // stepNum maps: 1->phase2, 2->phase3, 3->phase4
+  goToPhase(stepNum + 1);
+}
+
+// ═══════════════════════════════════════
+// NAV BUTTONS
+// ═══════════════════════════════════════
+function updateNavButtons() {
+  var prev = document.getElementById('navPrev');
+  var next = document.getElementById('navNext');
+  var cfg = phases[currentPhase];
+
+  // Last page (phase 5): hide both buttons
+  if (currentPhase >= 5) {
+    prev.style.display = 'none';
+    next.style.display = 'none';
+    return;
+  }
+
+  // Back: visible from phase 2+, disabled on phase 2 (can't go back to narrative)
+  if (currentPhase >= 2) {
+    prev.style.display = '';
+    prev.disabled = (currentPhase <= 2);
+  } else {
+    prev.style.display = 'none';
+  }
+
+  // Next: hidden on interactive steps
+  if (cfg.interactive) {
+    next.style.display = 'none';
+  } else if (currentPhase >= 1) {
+    next.style.display = '';
+    next.disabled = false;
+  } else {
+    next.style.display = 'none';
+  }
+
+  // Position: narrative-pos when not split
+  if (cfg.screen !== 'screen-split') {
+    next.classList.add('narrative-pos');
+  } else {
+    next.classList.remove('narrative-pos');
+  }
+}
+
+function goNext() {
+  var cfg = phases[currentPhase];
+  if (cfg.interactive) {
+    showTutorial(currentPhase);
+    return;
+  }
+  if (currentPhase < 5) goToPhase(currentPhase + 1);
+}
+
+function goPrev() {
+  if (currentPhase > 2) goToPhase(currentPhase - 1);
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (currentPhase === 0) return;
+  if (e.key === 'ArrowRight' || e.key === 'Right') {
+    var cfg = phases[currentPhase];
+    if (cfg.interactive) {
+      showTutorial(currentPhase);
+    } else {
+      goNext();
+    }
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    goPrev();
+  }
+});
+
+// ═══════════════════════════════════════
+// EMAIL ANIMATION (loops)
+// ═══════════════════════════════════════
+function startEmailAnim() {
+  if (emailAnimTimer) { clearTimeout(emailAnimTimer); emailAnimTimer = null; }
+
+  var cursor = document.getElementById('fakeCursor');
+  var row = document.getElementById('circuitshackRow');
+  var card = document.getElementById('emailCard');
+  var inbox = document.getElementById('inboxView');
+  var opened = document.getElementById('emailOpenView');
+  var cta = document.getElementById('emailCta');
+
+  // Reset
+  inbox.style.display = '';
+  opened.style.display = 'none';
+  cursor.classList.remove('visible');
+  cursor.style.transition = 'none';
+  cursor.style.transform = '';
+  cursor.style.left = '70%';
+  cursor.style.top = '80%';
+  row.classList.remove('hovered');
+  cta.classList.remove('hovered');
+
+  var timeouts = [];
+  function sched(fn, ms) { timeouts.push(setTimeout(fn, ms)); }
+
+  sched(function() { cursor.classList.add('visible'); }, 600);
+  sched(function() {
+    var rowRect = row.getBoundingClientRect();
+    var cardRect = card.getBoundingClientRect();
+    cursor.style.transition = 'left 0.8s cubic-bezier(0.25,0.1,0.25,1), top 0.8s cubic-bezier(0.25,0.1,0.25,1)';
+    cursor.style.left = (rowRect.left - cardRect.left + rowRect.width * 0.3) + 'px';
+    cursor.style.top = (rowRect.top - cardRect.top + rowRect.height / 2) + 'px';
+  }, 1000);
+
+  sched(function() { row.classList.add('hovered'); }, 1800);
+
+  sched(function() {
+    cursor.style.transform = 'scale(0.85)';
+    setTimeout(function() { cursor.style.transform = ''; }, 150);
+    row.classList.remove('hovered');
+    inbox.style.display = 'none';
+    opened.style.display = 'block';
+    cursor.classList.remove('visible');
+  }, 2200);
+
+  sched(function() {
+    cursor.style.transition = 'none';
+    cursor.style.left = '70%';
+    cursor.style.top = '50%';
+    cursor.classList.add('visible');
+  }, 3200);
+  sched(function() {
+    var ctaRect = cta.getBoundingClientRect();
+    var cardRect = card.getBoundingClientRect();
+    cursor.style.transition = 'left 0.8s cubic-bezier(0.25,0.1,0.25,1), top 0.8s cubic-bezier(0.25,0.1,0.25,1)';
+    cursor.style.left = (ctaRect.left - cardRect.left + ctaRect.width / 2) + 'px';
+    cursor.style.top = (ctaRect.top - cardRect.top + ctaRect.height / 2) + 'px';
+  }, 3600);
+
+  sched(function() { cta.classList.add('hovered'); }, 4600);
+
+  sched(function() {
+    cursor.style.transform = 'scale(0.85)';
+    setTimeout(function() { cursor.style.transform = ''; }, 150);
+    cta.classList.remove('hovered');
+    cursor.classList.remove('visible');
+  }, 5000);
+
+  emailAnimTimer = setTimeout(function() {
+    if (currentPhase === 1) startEmailAnim();
+  }, 7000);
+
+  window._emailTimeouts = timeouts;
+}
+
+function stopEmailAnim() {
+  if (emailAnimTimer) { clearTimeout(emailAnimTimer); emailAnimTimer = null; }
+  if (window._emailTimeouts) {
+    window._emailTimeouts.forEach(clearTimeout);
+    window._emailTimeouts = [];
+  }
+  var cursor = document.getElementById('fakeCursor');
+  if (cursor) cursor.classList.remove('visible');
+}
+
+// ═══════════════════════════════════════
+// NUDGE
+// ═══════════════════════════════════════
+function scheduleNudge() {
+  clearNudge();
+  nudgeTimer = setTimeout(function() {
+    if (currentPhase === 1) {
+      var btn = document.getElementById('navNext');
+      btn.classList.add('nudge');
+    }
+  }, 8000);
+}
+
+function clearNudge() {
+  if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = null; }
+  var btn = document.getElementById('navNext');
+  if (btn) btn.classList.remove('nudge');
+}
+
+// ═══════════════════════════════════════
+// TUTORIAL SPOTLIGHT
+// ═══════════════════════════════════════
+var tutorialMessages = {
+  2: 'Select your region, then click <span>Connect</span>',
+  3: 'Enter your credentials, then click <span>Sign in & Connect</span>',
+  '3-otp': 'Enter the verification code, then click <span>Submit code</span>'
+};
+var tutorialTimer = null;
+
+function showTutorial(phase) {
+  hideTutorial();
+  // Check if OTP phase is showing
+  var otpEl = document.getElementById('otpPhase');
+  var isOTP = otpEl && otpEl.style.display !== 'none' && phase === 3;
+  var msg = isOTP ? tutorialMessages['3-otp'] : tutorialMessages[phase];
+  if (!msg) return;
+
+  var cfg = phases[phase];
+  var dim = document.getElementById('tutorialDim');
+  var prompt = document.getElementById('tutorialPrompt');
+  var text = document.getElementById('tutorialText');
+  var stepEl = document.getElementById('step-' + cfg.step);
+
+  text.innerHTML = msg;
+
+  tutorialTimer = setTimeout(function() {
+    stepEl.classList.add('spotlit');
+    dim.classList.add('visible');
+    prompt.classList.add('visible');
+
+    tutorialTimer = setTimeout(function() {
+      hideTutorial();
+    }, 3000);
+  }, 1500);
+}
+
+function hideTutorial() {
+  if (tutorialTimer) { clearTimeout(tutorialTimer); tutorialTimer = null; }
+  document.getElementById('tutorialDim').classList.remove('visible');
+  document.getElementById('tutorialPrompt').classList.remove('visible');
+  document.querySelectorAll('.step-content.spotlit').forEach(function(el) {
+    el.classList.remove('spotlit');
+  });
+}
+
+document.addEventListener('click', function(e) {
+  if (document.getElementById('tutorialDim').classList.contains('visible')) {
+    hideTutorial();
+  }
+});
+
+// ═══════════════════════════════════════
+// STEP INTERACTIONS
+// ═══════════════════════════════════════
+function selectRegion(el) {
+  document.querySelectorAll('.link-page-radio').forEach(function(r) {
+    r.classList.remove('selected');
+    r.querySelector('.radio-circle').classList.remove('checked');
+  });
+  el.classList.add('selected');
+  el.querySelector('.radio-circle').classList.add('checked');
+}
+
+function showOTP() {
+  var email = document.getElementById('in-email').value.trim();
+  var pass = document.getElementById('in-pass').value.trim();
+  if (!email || !pass) {
+    // Flash the empty fields and re-show tutorial
+    if (!email) document.getElementById('in-email').style.borderColor = '#FF6058';
+    if (!pass) document.getElementById('in-pass').style.borderColor = '#FF6058';
+    setTimeout(function() {
+      document.getElementById('in-email').style.borderColor = '';
+      document.getElementById('in-pass').style.borderColor = '';
+    }, 1500);
+    showTutorial(currentPhase);
+    return;
+  }
+  document.getElementById('loginPhase').style.display = 'none';
+  document.getElementById('otpPhase').style.display = 'block';
+}
+
+function startConnect() {
+  var otp = document.getElementById('in-otp').value.trim();
+  if (!otp) {
+    document.getElementById('in-otp').style.borderColor = '#FF6058';
+    setTimeout(function() {
+      document.getElementById('in-otp').style.borderColor = '';
+    }, 1500);
+    showTutorial(currentPhase);
+    return;
+  }
+  document.getElementById('otpPhase').style.display = 'none';
+  document.getElementById('linkingPhase').style.display = 'block';
+
+  var fill = document.getElementById('linkingFill');
+  var status = document.getElementById('linkingStatus');
+  fill.style.width = '0%';
+
+  for (var i = 1; i <= 4; i++) {
+    var el = document.getElementById('lk-' + i);
+    el.classList.remove('active', 'done');
+  }
+  document.getElementById('lk-1').classList.add('active');
+
+  var lkPhases = [
+    { pct: 25, step: 1, status: 'Connecting to Amazon...', delay: 500 },
+    { pct: 50, step: 2, status: 'Extracting purchase data...', delay: 2000 },
+    { pct: 75, step: 3, status: 'Loading transactions...', delay: 3500 },
+    { pct: 100, step: 4, status: 'Complete!', delay: 5000 }
+  ];
+
+  lkPhases.forEach(function(p) {
+    setTimeout(function() {
+      fill.style.width = p.pct + '%';
+      status.textContent = p.status;
+      for (var j = 1; j <= 4; j++) {
+        var el = document.getElementById('lk-' + j);
+        el.classList.remove('active', 'done');
+        if (j < p.step) el.classList.add('done');
+        if (j === p.step) el.classList.add('active');
+      }
+    }, p.delay);
+  });
+
+  // Auto-advance to connected (phase 4)
+  setTimeout(function() {
+    document.getElementById('loginPhase').style.display = '';
+    document.getElementById('otpPhase').style.display = 'none';
+    document.getElementById('linkingPhase').style.display = 'none';
+    goToPhase(4);
+  }, 6500);
+}
+
+// ═══════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════
+function fireConfetti() {
+  var container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+
+  var colors = ['#2B5CFF', '#6366F1', '#FFD93D', '#1D8B4E', '#FF6B6B', '#FF9900'];
+  var shapes = ['circle', 'square', 'strip'];
+
+  for (var i = 0; i < 80; i++) {
+    var c = document.createElement('div');
+    c.className = 'confetti-piece';
+    var shape = shapes[Math.floor(Math.random() * shapes.length)];
+    var size = 6 + Math.random() * 8;
+    c.style.left = Math.random() * 100 + '%';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.setProperty('--delay', (Math.random() * 0.6) + 's');
+    c.style.setProperty('--duration', (2.5 + Math.random() * 2) + 's');
+    c.style.setProperty('--spin', (400 + Math.random() * 400) + 'deg');
+
+    if (shape === 'circle') {
+      c.style.width = size + 'px'; c.style.height = size + 'px'; c.style.borderRadius = '50%';
+    } else if (shape === 'strip') {
+      c.style.width = (size * 0.4) + 'px'; c.style.height = (size * 1.8) + 'px'; c.style.borderRadius = '2px';
+    } else {
+      c.style.width = size + 'px'; c.style.height = size + 'px'; c.style.borderRadius = '2px';
+    }
+    container.appendChild(c);
+  }
+
+  setTimeout(function() { container.remove(); }, 5000);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+updateNavButtons();
+</script>
+
+</body>
+</html>
