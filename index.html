@@ -92,7 +92,7 @@
     /* ── FULL-WIDTH NARRATIVE SCREENS ── */
     .screen-narrative {
       background: var(--parchment-light);
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       overflow: hidden;
     }
@@ -1019,7 +1019,30 @@
       opacity: 0.3; cursor: default; pointer-events: none;
     }
     .step-nav-btn svg { width: 22px; height: 22px; }
+
+    /* ── SIMULATION LINK ── */
+    .sim-link-wrap {
+      text-align: center;
+      margin-top: 14px;
+    }
+    .sim-link {
+      font-size: 13px;
+      color: var(--ink-faint);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .sim-link:hover {
+      color: var(--ink-muted);
+      text-decoration: underline;
+    }
     #navPrev { left: 32px; }
+    #navPrev.narrative-pos {
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #navPrev.narrative-pos:hover { transform: translateY(-50%) scale(1.05); }
     #navNext {
       right: 32px;
       bottom: auto;
@@ -1366,6 +1389,11 @@
           ></iframe>
         </div>
       </div>
+      <div class="sim-link-wrap" id="simLinkWrap" style="display:none;">
+        <a href="https://simulation.ariodata.com/" target="_blank" class="sim-link">
+          Or, see how it works with an example&nbsp;→
+        </a>
+      </div>
     </div>
 
   </div><!-- /split-right -->
@@ -1551,6 +1579,10 @@ function goToPhase(n) {
     stopEmailAnim();
   }
 
+  // Show simulation link only on Customer Links step (phase 4)
+  var simLink = document.getElementById('simLinkWrap');
+  if (simLink) simLink.style.display = (n === 4) ? '' : 'none';
+
   // Confetti on connected (phase 5)
   if (n === 5) {
     fireConfetti();
@@ -1597,10 +1629,10 @@ function updateNavButtons() {
     return;
   }
 
-  // Back: visible from phase 3+, disabled on phase 3 (can't go back to narrative)
-  if (currentPhase >= 3) {
+  // Back: visible from phase 2+
+  if (currentPhase >= 2) {
     prev.style.display = '';
-    prev.disabled = (currentPhase <= 3);
+    prev.disabled = false;
   } else {
     prev.style.display = 'none';
   }
@@ -1618,8 +1650,10 @@ function updateNavButtons() {
   // Position: narrative-pos when not split
   if (cfg.screen !== 'screen-split') {
     next.classList.add('narrative-pos');
+    prev.classList.add('narrative-pos');
   } else {
     next.classList.remove('narrative-pos');
+    prev.classList.remove('narrative-pos');
   }
 }
 
@@ -1633,7 +1667,7 @@ function goNext() {
 }
 
 function goPrev() {
-  if (currentPhase > 3) goToPhase(currentPhase - 1);
+  if (currentPhase > 1) goToPhase(currentPhase - 1);
 }
 
 // ═══════════════════════════════════════
