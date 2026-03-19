@@ -1044,7 +1044,7 @@ function animatePrefill() {
   var passEl = document.getElementById('in-pass');
   var emailVal = 'test@ariodata.com';
   var passVal = 'test123!';
-  var delay = 55;
+  var delay = 83;
 
   // Reset
   emailEl.value = '';
@@ -1160,6 +1160,22 @@ function selectRegion(el) {
   el.querySelector('.radio-circle').classList.add('checked');
 }
 
+function animateOTPPrefill() {
+  var otpEl = document.getElementById('in-otp');
+  var otpVal = '482916';
+  var delay = 180;
+  otpEl.value = '';
+  var i = 0;
+  otpEl.focus();
+  var t = setInterval(function() {
+    otpEl.value += otpVal[i++];
+    if (i >= otpVal.length) {
+      clearInterval(t);
+      otpEl.blur();
+    }
+  }, delay);
+}
+
 function showOTP() {
   var email = document.getElementById('in-email').value.trim();
   var pass = document.getElementById('in-pass').value.trim();
@@ -1175,6 +1191,7 @@ function showOTP() {
   }
   document.getElementById('loginPhase').style.display = 'none';
   document.getElementById('otpPhase').style.display = 'block';
+  animateOTPPrefill();
 }
 
 function startConnect() {
