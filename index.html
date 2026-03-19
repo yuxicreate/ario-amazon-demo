@@ -1201,14 +1201,24 @@
 <div class="screen screen-narrative" id="screen-narrative" style="display:none;opacity:0;">
   <div class="narrative-inner" style="display:flex;gap:48px;align-items:flex-start;padding-top:10vh;">
     <div style="flex:1;min-width:400px;">
-      <div class="narrative-eyebrow">The scenario</div>
-      <div class="narrative-title">Setting the stage</div>
+      <div class="narrative-eyebrow" id="narrativeEyebrow">The scenario</div>
+      <div class="narrative-title" id="narrativeTitle">Setting the stage</div>
       <ul class="narrative-bullets">
-        <li>Circuit Shack sends a promotional email offering $25 store credit for sharing electronics purchases from Amazon over the past year</li>
-        <li>Customer clicks through and accepts the offer</li>
+        <li id="narrativeBullet1">Circuit Shack sends a promotional email offering $25 store credit for sharing electronics purchases from Amazon over the past year</li>
+        <li id="narrativeBullet2">Customer clicks through and accepts the offer</li>
+        <li id="narrativeBullet3" style="display:none;"></li>
       </ul>
     </div>
-    <div style="flex:0 0 480px;" id="narrativeBrowserWrap">
+    <div style="flex:0 0 480px;" id="narrativeImageWrap">
+      <img
+        id="narrativeImage"
+        src="cs.webp"
+        alt="Consent preview"
+        style="width:100%;object-fit:contain;display:block;"
+      />
+    </div>
+
+    <div style="flex:0 0 480px;display:none;" id="narrativeBrowserWrap">
       <div class="browser">
         <div class="browser-toolbar">
           <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
@@ -1387,10 +1397,11 @@
 // Logical flow:
 //   phase 0 = intro overlay
 //   phase 1 = narrative (stage-setter) — full-width, email anim loops
-//   phase 2 = step 1 (present the offer) — split, interactive
-//   phase 3 = step 2 (customer links) — split, interactive
-//   phase 4 = step 3 (connected) — split, NOT interactive
-//   phase 5 = step 4 (data view) — narrative, NOT interactive
+//   phase 2 = narrative (consent explainer) — full-width, email anim loops
+//   phase 3 = step 1 (present the offer) — split, interactive
+//   phase 4 = step 2 (customer links) — split, interactive
+//   phase 5 = step 3 (connected) — split, NOT interactive
+//   phase 6 = step 4 (data view) — narrative, NOT interactive
 
 var currentPhase = 0;
 var emailAnimTimer = null;
@@ -1398,17 +1409,41 @@ var nudgeTimer = null;
 
 var phases = {
   0: { screen: null, interactive: false },
-  1: { screen: 'screen-narrative', interactive: false, step: null },
-  2: { screen: 'screen-split', step: 1, interactive: true,
+  1: {
+    screen: 'screen-narrative',
+    interactive: false,
+    step: null,
+    narrativeEyebrow: 'The scenario',
+    narrativeTitle: 'Setting the stage',
+    narrativeVisual: 'image',
+    narrativeBullets: [
+      'Circuit Shack is a fictitious consumer electronics company',
+      'Amazon is its #1 competitor',
+      'The company wants to know what purchases their customers have made on Amazon'
+    ]
+  },
+  2: {
+    screen: 'screen-narrative',
+    interactive: false,
+    step: null,
+    narrativeEyebrow: 'The scenario',
+    narrativeTitle: 'Setting the stage',
+    narrativeVisual: 'browser',
+    narrativeBullets: [
+      'Circuit Shack sends a promotional email offering $25 store credit for sharing electronics purchases from Amazon over the past year',
+      'Customer clicks through and accepts the offer'
+    ]
+  },
+  3: { screen: 'screen-split', step: 1, interactive: true,
        eyebrow: 'Value exchange', title: 'Accept the <em>Offer</em>',
        desc: 'The retailer presents a value exchange — store credit, VIP access, or personalized deals — in return for a quick data connection.' },
-  3: { screen: 'screen-split', step: 2, interactive: true,
+  4: { screen: 'screen-split', step: 2, interactive: true,
        eyebrow: 'Secure authentication', title: 'Customer <em>Links</em>',
        desc: 'The customer signs in to Amazon. Ario handles the secure connection, 2FA, and data retrieval behind the scenes.' },
-  4: { screen: 'screen-split', step: 3, interactive: true,
+  5: { screen: 'screen-split', step: 3, interactive: false,
        eyebrow: 'Confirmation', title: '<em>Connected</em>',
        desc: 'The account is linked. Verified purchase data begins streaming into your systems immediately.' },
-  5: { screen: 'screen-split', step: 4, interactive: false,
+  6: { screen: 'screen-split', step: 4, interactive: false,
        eyebrow: 'Actionable intelligence', title: 'Data <em>flows in</em>',
        desc: 'SKU-level transaction data, filtered by category, ready for your CRM, personalization engine, or analytics stack.' }
 };
@@ -1449,7 +1484,7 @@ function showScreen(id) {
 // GO TO PHASE
 // ═══════════════════════════════════════
 function goToPhase(n) {
-  if (n < 1 || n > 5) return;
+  if (n < 1 || n > 6) return;
   currentPhase = n;
   var cfg = phases[n];
 
@@ -1476,15 +1511,48 @@ function goToPhase(n) {
     });
   }
 
-  // Email animation
-  if (n === 1) {
+  // If narrative, update narrative copy for this phase
+  if (cfg.screen === 'screen-narrative') {
+    var narrativeEyebrow = document.getElementById('narrativeEyebrow');
+    var narrativeTitle = document.getElementById('narrativeTitle');
+    var narrativeBullet1 = document.getElementById('narrativeBullet1');
+    var narrativeBullet2 = document.getElementById('narrativeBullet2');
+    var narrativeBullet3 = document.getElementById('narrativeBullet3');
+    var narrativeImageWrap = document.getElementById('narrativeImageWrap');
+    var narrativeBrowserWrap = document.getElementById('narrativeBrowserWrap');
+    if (narrativeEyebrow && cfg.narrativeEyebrow) narrativeEyebrow.textContent = cfg.narrativeEyebrow;
+    if (narrativeTitle && cfg.narrativeTitle) narrativeTitle.textContent = cfg.narrativeTitle;
+    if (narrativeBullet1 && cfg.narrativeBullets && cfg.narrativeBullets[0]) narrativeBullet1.textContent = cfg.narrativeBullets[0];
+    if (narrativeBullet2 && cfg.narrativeBullets && cfg.narrativeBullets[1]) narrativeBullet2.textContent = cfg.narrativeBullets[1];
+    if (narrativeBullet3) {
+      if (cfg.narrativeBullets && cfg.narrativeBullets[2]) {
+        narrativeBullet3.textContent = cfg.narrativeBullets[2];
+        narrativeBullet3.style.display = '';
+      } else {
+        narrativeBullet3.textContent = '';
+        narrativeBullet3.style.display = 'none';
+      }
+    }
+    if (narrativeImageWrap && narrativeBrowserWrap) {
+      if (cfg.narrativeVisual === 'image') {
+        narrativeImageWrap.style.display = '';
+        narrativeBrowserWrap.style.display = 'none';
+      } else {
+        narrativeImageWrap.style.display = 'none';
+        narrativeBrowserWrap.style.display = '';
+      }
+    }
+  }
+
+  // Email animation only on narrative browser visual
+  if (cfg.screen === 'screen-narrative' && cfg.narrativeVisual === 'browser') {
     setTimeout(startEmailAnim, 400);
   } else {
     stopEmailAnim();
   }
 
-  // Confetti on connected (phase 4)
-  if (n === 4) {
+  // Confetti on connected (phase 5)
+  if (n === 5) {
     fireConfetti();
     // Pulse the next button after confetti settles
     setTimeout(function() {
@@ -1501,7 +1569,7 @@ function goToPhase(n) {
   }
 
   // Nudge on narrative
-  if (n === 1) {
+  if (n === 1 || n === 2) {
     scheduleNudge();
   }
 
@@ -1510,8 +1578,8 @@ function goToPhase(n) {
 
 // Called from in-page buttons
 function goToStep(stepNum) {
-  // stepNum maps: 1->phase2, 2->phase3, 3->phase4
-  goToPhase(stepNum + 1);
+  // stepNum maps: 1->phase3, 2->phase4, 3->phase5
+  goToPhase(stepNum + 2);
 }
 
 // ═══════════════════════════════════════
@@ -1522,17 +1590,17 @@ function updateNavButtons() {
   var next = document.getElementById('navNext');
   var cfg = phases[currentPhase];
 
-  // Last page (phase 5): hide both buttons
-  if (currentPhase >= 5) {
+  // Last page (phase 6): hide both buttons
+  if (currentPhase >= 6) {
     prev.style.display = 'none';
     next.style.display = 'none';
     return;
   }
 
-  // Back: visible from phase 2+, disabled on phase 2 (can't go back to narrative)
-  if (currentPhase >= 2) {
+  // Back: visible from phase 3+, disabled on phase 3 (can't go back to narrative)
+  if (currentPhase >= 3) {
     prev.style.display = '';
-    prev.disabled = (currentPhase <= 2);
+    prev.disabled = (currentPhase <= 3);
   } else {
     prev.style.display = 'none';
   }
@@ -1561,11 +1629,11 @@ function goNext() {
     showTutorial(currentPhase);
     return;
   }
-  if (currentPhase < 5) goToPhase(currentPhase + 1);
+  if (currentPhase < 6) goToPhase(currentPhase + 1);
 }
 
 function goPrev() {
-  if (currentPhase > 2) goToPhase(currentPhase - 1);
+  if (currentPhase > 3) goToPhase(currentPhase - 1);
 }
 
 // ═══════════════════════════════════════
@@ -1697,9 +1765,9 @@ function clearNudge() {
 // TUTORIAL SPOTLIGHT
 // ═══════════════════════════════════════
 var tutorialMessages = {
-  2: 'Select your region, then click <span>Connect</span>',
-  3: 'Enter your credentials, then click <span>Sign in & Connect</span>',
-  '3-otp': 'Enter the verification code, then click <span>Submit code</span>'
+  3: 'Select your region, then click <span>Connect</span>',
+  4: 'Enter your credentials, then click <span>Sign in & Connect</span>',
+  '4-otp': 'Enter the verification code, then click <span>Submit code</span>'
 };
 var tutorialTimer = null;
 
@@ -1707,8 +1775,8 @@ function showTutorial(phase) {
   hideTutorial();
   // Check if OTP phase is showing
   var otpEl = document.getElementById('otpPhase');
-  var isOTP = otpEl && otpEl.style.display !== 'none' && phase === 3;
-  var msg = isOTP ? tutorialMessages['3-otp'] : tutorialMessages[phase];
+  var isOTP = otpEl && otpEl.style.display !== 'none' && phase === 4;
+  var msg = isOTP ? tutorialMessages['4-otp'] : tutorialMessages[phase];
   if (!msg) return;
 
   var cfg = phases[phase];
@@ -1818,12 +1886,12 @@ function startConnect() {
     }, p.delay);
   });
 
-  // Auto-advance to connected (phase 4)
+  // Auto-advance to connected (phase 5)
   setTimeout(function() {
     document.getElementById('loginPhase').style.display = '';
     document.getElementById('otpPhase').style.display = 'none';
     document.getElementById('linkingPhase').style.display = 'none';
-    goToPhase(4);
+    goToPhase(5);
   }, 6500);
 }
 
@@ -1874,6 +1942,8 @@ const iframe = document.getElementById('browser-iframe');
 window.addEventListener('message', (event) => {
 
   if (event.data?.type === "CHANGE_STEP") {
+    // Ignore iframe-driven step changes until split flow begins.
+    if (currentPhase < 3) return;
     goToStep(event.data.step);
   }
 });
