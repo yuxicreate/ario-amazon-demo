@@ -453,6 +453,25 @@
       color: var(--ink); letter-spacing: -0.02em;
     }
     .data-meta { font-size: 12px; color: var(--ink-faint); font-weight: 500; }
+    .data-filters {
+      display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .data-filter {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 600; color: var(--ink-muted);
+      background: #fff; border: 1px solid var(--rule-light);
+      border-radius: 999px; padding: 7px 14px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.15s;
+    }
+    .data-filter:hover { border-color: var(--blue); color: var(--blue); }
+    .data-filter.active {
+      background: var(--blue); border-color: var(--blue); color: #fff;
+    }
+    .data-filter .df-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500; opacity: 0.7;
+    }
     .data-kpis {
       display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 10px; margin-bottom: 16px;
@@ -471,7 +490,7 @@
       border-radius: 10px; overflow: hidden; margin-bottom: 12px;
     }
     .dt-head {
-      display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 0.8fr;
+      display: grid; grid-template-columns: 2fr 1.35fr 0.7fr 0.8fr 0.9fr;
       padding: 10px 16px;
       background: var(--parchment-light); border-bottom: 1px solid var(--rule-light);
       font-family: 'JetBrains Mono', monospace;
@@ -479,7 +498,7 @@
       text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint);
     }
     .dt-row {
-      display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 0.8fr;
+      display: grid; grid-template-columns: 2fr 1.35fr 0.7fr 0.8fr 0.9fr;
       padding: 10px 16px;
       border-bottom: 1px solid var(--rule-light);
       font-size: 13px; color: var(--ink-soft); align-items: center;
@@ -487,12 +506,27 @@
     }
     .dt-row:last-child { border-bottom: none; }
     .dt-row:hover { background: var(--parchment-light); }
-    .dt-product { font-weight: 500; color: var(--ink); }
+    .dt-product { font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .dt-thumb {
+      width: 38px; height: 38px; flex-shrink: 0; object-fit: contain;
+      background: #fff; border: 1px solid var(--rule-light); border-radius: 7px; padding: 3px;
+    }
+    .dt-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dt-cat {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px; font-weight: 500; color: var(--blue);
-      background: var(--blue-dim); padding: 3px 8px; border-radius: 4px; display: inline-block;
+      background: var(--blue-dim); padding: 3px 8px; border-radius: 4px; display: inline-block; white-space: nowrap;
     }
+    .dt-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500; text-transform: capitalize;
+      padding: 3px 8px 3px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;
+      white-space: nowrap;
+    }
+    .dt-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .dt-status.shipped   { color: var(--green); background: var(--green-dim); }
+    .dt-status.returned  { color: #B45309; background: rgba(217,119,6,0.10); }
+    .dt-status.cancelled { color: #B91C1C; background: rgba(185,28,28,0.08); }
     .dt-price { font-weight: 500; }
     .dt-date { color: var(--ink-faint); font-size: 12px; }
     .insight-bar {
@@ -631,7 +665,7 @@
       .linking-screen { height: auto; min-height: 360px; padding: 24px 20px; }
       .data-kpis { grid-template-columns: repeat(2, 1fr); }
       .data-table { overflow-x: auto; }
-      .dt-head, .dt-row { min-width: 500px; }
+      .dt-head, .dt-row { min-width: 760px; }
       #navPrev { left: 16px; bottom: 20px; width: 48px; height: 48px; }
       .tutorial-prompt {
         left: 50% !important;
@@ -663,7 +697,6 @@
     <img src="ario-logo-black.png" alt="Ario" class="topbar-logo">
     <div class="topbar-sep"></div>
     <span class="topbar-label">Circuit Shack Demo</span>
-    <span class="sim-badge">Simulation</span>
   </div>
   <a href="https://ariodata.com/amazon/" class="topbar-back">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5"/></svg>
@@ -890,7 +923,7 @@
     </div>
 
     <!-- STEP 4: DATA VIEW -->
-    <div id="step-4" style="display:none;width:100%;max-width:900px;align-self:flex-start;">
+    <div id="step-4" style="display:none;width:100%;max-width:1060px;align-self:flex-start;">
       <div class="browser">
         <div class="browser-toolbar">
           <div class="browser-dots"><span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span></div>
@@ -899,36 +932,36 @@
             <span class="browser-url-text">dashboard.circuitshack.com/customers/insights</span>
           </div>
         </div>
-        <div class="browser-body" style="height:auto;max-height:400px;overflow-y:auto;padding:16px;">
+        <div class="browser-body" style="height:auto;max-height:540px;overflow-y:auto;padding:16px;">
           <div class="data-header">
             <div>
               <div class="data-eyebrow">Ario Data View &middot; Customer #3151</div>
-              <div class="data-title">Electronics Purchase History</div>
+              <div class="data-title">Purchase History</div>
             </div>
-            <div class="data-meta">Amazon &middot; Last 12 months</div>
+            <div class="data-meta">Amazon &middot; Last 5 years</div>
+          </div>
+          <div class="data-filters" id="dataFilters">
+            <button class="data-filter active" data-filter="all" onclick="setDataFilter('all')">All <span class="df-count" id="cnt-all"></span></button>
+            <button class="data-filter" data-filter="Electronics" onclick="setDataFilter('Electronics')">Electronics <span class="df-count" id="cnt-Electronics"></span></button>
+            <button class="data-filter" data-filter="Pet Supplies" onclick="setDataFilter('Pet Supplies')">Pet Supplies <span class="df-count" id="cnt-Pet Supplies"></span></button>
+            <button class="data-filter" data-filter="Beauty" onclick="setDataFilter('Beauty')">Beauty <span class="df-count" id="cnt-Beauty"></span></button>
           </div>
           <div class="data-kpis">
-            <div class="kpi"><div class="kpi-val">$2,847</div><div class="kpi-lbl">Total Spend</div></div>
-            <div class="kpi"><div class="kpi-val">23</div><div class="kpi-lbl">Orders</div></div>
-            <div class="kpi"><div class="kpi-val">$124</div><div class="kpi-lbl">Avg Order</div></div>
-            <div class="kpi"><div class="kpi-val">7</div><div class="kpi-lbl">Categories</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiSpend">$0</div><div class="kpi-lbl">Total Spend</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiOrders">0</div><div class="kpi-lbl">Orders</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiAvg">$0</div><div class="kpi-lbl">Avg Order</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiCats">0</div><div class="kpi-lbl">Categories</div></div>
           </div>
           <div class="data-table">
-            <div class="dt-head"><span>Product</span><span>Category</span><span>Price</span><span>Date</span></div>
-            <div class="dt-row"><span class="dt-product">Sony WH-1000XM5 Headphones</span><span><span class="dt-cat">Audio</span></span><span class="dt-price">$348.00</span><span class="dt-date">Feb 2026</span></div>
-            <div class="dt-row"><span class="dt-product">Apple iPad Air M2 (256GB)</span><span><span class="dt-cat">Tablets</span></span><span class="dt-price">$599.00</span><span class="dt-date">Jan 2026</span></div>
-            <div class="dt-row"><span class="dt-product">Anker 737 Power Bank</span><span><span class="dt-cat">Accessories</span></span><span class="dt-price">$109.99</span><span class="dt-date">Jan 2026</span></div>
-            <div class="dt-row"><span class="dt-product">LG C3 55" OLED TV</span><span><span class="dt-cat">TV &amp; Display</span></span><span class="dt-price">$1,096.99</span><span class="dt-date">Dec 2025</span></div>
-            <div class="dt-row"><span class="dt-product">Logitech MX Master 3S</span><span><span class="dt-cat">Peripherals</span></span><span class="dt-price">$99.99</span><span class="dt-date">Nov 2025</span></div>
-            <div class="dt-row"><span class="dt-product">Samsung T7 2TB SSD</span><span><span class="dt-cat">Storage</span></span><span class="dt-price">$149.99</span><span class="dt-date">Oct 2025</span></div>
-            <div class="dt-row"><span class="dt-product">Google Nest Hub Max</span><span><span class="dt-cat">Smart Home</span></span><span class="dt-price">$229.99</span><span class="dt-date">Sep 2025</span></div>
+            <div class="dt-head"><span>Product</span><span>Category</span><span>Price</span><span>Date</span><span>Status</span></div>
+            <div id="dtRows"></div>
           </div>
           <div class="insight-bar">
             <div class="insight-icon">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v1M8 13v1M2 8h1M13 8h1M4.2 4.2l.7.7M11.1 11.1l.7.7M4.2 11.8l.7-.7M11.1 4.9l.7-.7"/><circle cx="8" cy="8" r="3"/></svg>
             </div>
-            <div>
-              <strong>Ario Insight:</strong> This customer over-indexes on premium audio and display — 51% of spend in two categories. High likelihood to convert on home theater bundles.
+            <div id="insightText">
+              <strong>Ario Insight:</strong> Loading&hellip;
             </div>
         </div>
       </div>
@@ -1280,6 +1313,236 @@ function fireConfetti() {
 
   setTimeout(function() { container.remove(); }, 5000);
 }
+
+// ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// ARIO DATA VIEW — 5yr / 1000 txns w/ filters
+// Product pool grounded in real Ario CoreLens panel data
+// (top products + median prices per category)
+// ═══════════════════════════════════════
+// Every item carries a real Amazon ASIN (from Ario CoreLens) so the
+// thumbnail resolves to the genuine product image.
+var PRODUCT_POOL = [
+  // ── Electronics ──
+  { cat:'Electronics', sub:'Electronics', name:'Echo Dot (3rd Gen) Smart Speaker', price:24.99, w:581, asin:'B07FZ8S74R' },
+  { cat:'Electronics', sub:'Electronics',  name:'Fire TV Stick with Alexa Voice Remote', price:19.99, w:467, asin:'B08C1W5N87' },
+  { cat:'Electronics', sub:'Electronics',name:'Apple AirTag', price:27.99, w:367, asin:'B0933BVK6T' },
+  { cat:'Electronics', sub:'Electronics',      name:'Apple AirPods Pro', price:194.00, w:149, asin:'B07ZPC9QD4' },
+  { cat:'Electronics', sub:'Cell Phones & Accessories',   name:'Apple 20W USB-C Power Adapter', price:17.00, w:160, asin:'B08L5M9BTJ' },
+  { cat:'Electronics', sub:'Electronics', name:'Echo Show 5 Smart Display', price:44.99, w:165, asin:'B08J8FFJ8H' },
+  { cat:'Electronics', sub:'Computers',    name:'Amazon Basics 128GB microSD Card', price:11.99, w:167, asin:'B08TJRVWV1' },
+  { cat:'Electronics', sub:'Electronics',    name:'Blink Mini Indoor Security Camera', price:24.99, w:141, asin:'B07X6C9RMF' },
+  { cat:'Electronics', sub:'Electronics',  name:'Roku Express HD Streaming Player', price:24.99, w:134, asin:'B07WVFCVJN' },
+  { cat:'Electronics', sub:'Electronics',      name:'Sony ZX Wired On-Ear Headphones', price:9.99, w:113, asin:'B00NJ2M33I' },
+  // ── Pet Supplies ──
+  { cat:'Pet Supplies', sub:'Pet Supplies',   name:'Meow Mix Original Choice Dry Cat Food, 6.3 lb', price:9.00, w:446, asin:'B007JXVR76' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Fresh Step Clumping Cat Litter, 14 lb', price:10.49, w:255, asin:'B000VDR8LA' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Solimo Duck Jerky Dog Treats, 2 lb', price:19.99, w:245, asin:'B07F2MHBR2' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:"Dr. Elsey's Ultra Clumping Cat Litter, 40 lb", price:20.99, w:222, asin:'B0009X29WK' },
+  { cat:'Pet Supplies', sub:'Pet Supplies',   name:'Purina Cat Chow Indoor Dry Cat Food, 13 lb', price:16.99, w:192, asin:'B01H3OA7KI' },
+  { cat:'Pet Supplies', sub:'Pet Supplies',   name:'Purina Friskies Dry Cat Food, 3.15 lb', price:4.99, w:202, asin:'B0727R5C5Q' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Elanco Tapeworm Dewormer for Cats (3-ct)', price:16.98, w:180, asin:'B019CD4ZDS' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Temptations MixUps Cat Treats, 16 oz', price:8.24, w:180, asin:'B00OLSARS2' },
+  { cat:'Pet Supplies', sub:'Pet Supplies',   name:'Purina ONE Chicken & Rice Dog Food, 16.5 lb', price:30.28, w:170, asin:'B006JCUGVQ' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:"Good'N'Fun Rawhide Kabobs for Dogs, 1.5 lb", price:15.98, w:158, asin:'B07BVL8TQF' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Milk-Bone Original Dog Biscuits, 10 lb', price:14.97, w:128, asin:'B0018CLXTG' },
+  { cat:'Pet Supplies', sub:'Pet Supplies',   name:'Purina ONE Lamb & Rice Dog Food, 31.1 lb', price:48.98, w:134, asin:'B009IOCCD2' },
+  // ── Beauty ──
+  { cat:'Beauty', sub:'Beauty',      name:'essence Lash Princess Mascara', price:4.99, w:780, asin:'B00T0C9XRK' },
+  { cat:'Beauty', sub:'Health & Personal Care',    name:'PanOxyl Acne Foaming Wash 10%', price:9.77, w:486, asin:'B081KL2QYJ' },
+  { cat:'Beauty', sub:'Health & Personal Care',    name:'Mighty Patch Original Pimple Patches (36-ct)', price:12.99, w:302, asin:'B074PVTPBW' },
+  { cat:'Beauty', sub:'Health & Personal Care',    name:'Nizoral Anti-Dandruff Shampoo, 7 oz', price:15.88, w:294, asin:'B00AINMFAC' },
+  { cat:'Beauty', sub:'Beauty',    name:"Paula's Choice 2% BHA Liquid Exfoliant", price:34.00, w:231, asin:'B00949CTQQ' },
+  { cat:'Beauty', sub:'Beauty',    name:'COSRX Snail Mucin 96% Essence', price:13.99, w:209, asin:'B00PBX3L7K' },
+  { cat:'Beauty', sub:'Beauty',    name:'The Ordinary Niacinamide 10% + Zinc', price:6.00, w:187, asin:'B01MDTVZTZ' },
+  { cat:'Beauty', sub:'Beauty',    name:'Mielle Rosemary Mint Scalp & Hair Oil', price:9.38, w:190, asin:'B07N7PK9QK' },
+  { cat:'Beauty', sub:'Beauty',      name:'Maybelline Sky High Mascara', price:9.98, w:180, asin:'B08H3JPH74' },
+  { cat:'Beauty', sub:'Beauty', name:'eos Shea Better Body Lotion, 16 oz', price:8.98, w:261, asin:'B08KT2Z93D' },
+  { cat:'Beauty', sub:'Health & Personal Care', name:'Dove Deep Moisture Body Wash, 30.6 oz', price:9.97, w:174, asin:'B00MEDOY2G' },
+  { cat:'Beauty', sub:'Health & Personal Care',   name:'TheraBreath Fresh Breath Mouthwash (2-Pack)', price:15.34, w:160, asin:'B00IRKRK9O' },
+  { cat:'Beauty', sub:'Beauty',      name:'NYX Epic Ink Liquid Eyeliner', price:8.95, w:160, asin:'B074Y8LM6T' },
+  { cat:'Beauty', sub:'Beauty',    name:'BIODANCE Bio-Collagen Overnight Mask (4-ct)', price:19.00, w:138, asin:'B0B2RM68G2' },
+  { cat:'Beauty', sub:'Health & Personal Care',   name:'Degree Men Cool Rush Antiperspirant (Twin)', price:6.96, w:231, asin:'B00TPRG5D0' },
+  { cat:'Beauty', sub:'Health & Personal Care',   name:'Crest + Scope Whitening Toothpaste (3-Pack)', price:8.99, w:148, asin:'B005PLQIQ4' },
+  // ── Extra products (verified real images) to widen variety ──
+  { cat:'Electronics', sub:'Electronics', name:'Apple Lightning to 3.5 mm Adapter', price:7.99, w:274, asin:'B01LXJFMGF' },
+  { cat:'Electronics', sub:'Electronics', name:'Apple EarPods (Lightning)', price:18.32, w:208, asin:'B01M0GB8CC' },
+  { cat:'Electronics', sub:'Cell Phones & Accessories', name:'iPhone Lightning Charging Cable (4-Pack)', price:7.99, w:184, asin:'B08D6TPP5Y' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Fancy Feast Classic Pate Variety (30-Pack)', price:24.99, w:172, asin:'B07CTBXRXD' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:"Dr. Elsey's Precious Cat Ultra Litter, 18 lb", price:11.00, w:170, asin:'B0009X0QSY' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'9Lives Paté Favorites Wet Cat Food (12-Pack)', price:7.98, w:165, asin:'B01N55TYJ7' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Meow Mix Original Choice Dry Cat Food, 22 lb', price:17.98, w:153, asin:'B01LZSZ8JF' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Ultra Micro Crystals Cat Litter, 5 lb', price:12.99, w:153, asin:'B0030HO67I' },
+  { cat:'Pet Supplies', sub:'Pet Supplies', name:'Pork Chomps Munchy Sticks (50-ct)', price:5.99, w:130, asin:'B00X4S4IIK' },
+  { cat:'Beauty', sub:'Beauty', name:'Neutrogena Makeup Remover Wipes (2 x 25-ct)', price:8.99, w:202, asin:'B00U2VQZDS' },
+  { cat:'Beauty', sub:'Beauty', name:'Lottabody Wrap Me Foaming Curl Mousse', price:5.98, w:193, asin:'B000TG63EW' },
+  { cat:'Beauty', sub:'Beauty', name:'Catrice Under Eye Brightener', price:6.00, w:157, asin:'B09V1CPTR1' },
+  { cat:'Beauty', sub:'Beauty', name:'Schick Hydro Silk Dermaplaning Tool (3-ct)', price:4.99, w:154, asin:'B0787GLBMV' },
+  { cat:'Beauty', sub:'Health & Personal Care', name:'Colgate Peroxyl Antiseptic Mouth Rinse', price:9.86, w:153, asin:'B00WOSEKP2' }
+];
+
+// Seeded PRNG so numbers/dates are stable across loads (nicer for a demo)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var _rng = mulberry32(31510);
+function rand(){ return _rng(); }
+function pick(arr){ return arr[Math.floor(rand()*arr.length)]; }
+
+var TXNS = [];
+// Uneven, organic split (beauty-led household) — ~703 orders over 5yr, a believable cadence.
+// `exp` = weighting curve: electronics near-uniform (gadgets are one-off buys, no staples),
+// pet & beauty keep a mild popularity lean (consumables have genuine repeat-buy staples).
+var CAT_MIX = [ {cat:'Electronics',n:96,exp:0.15}, {cat:'Pet Supplies',n:274,exp:0.30}, {cat:'Beauty',n:333,exp:0.30} ];
+// Collapse product variants into families so spacing never places two of the same
+// family (e.g. two AirPods, two Echo Dots, two Fresh Step litters) close together.
+function famOf(name){
+  var rules = [
+    [/AirPods/,'AirPods'],[/AirTag/,'AirTag'],[/Echo Dot/,'Echo Dot'],[/Echo Show/,'Echo Show'],
+    [/Fire TV/,'Fire TV'],[/Roku/,'Roku'],[/EarPods/,'Apple EarPods'],
+    [/Meow Mix/,'Meow Mix'],[/Fresh Step/,'Fresh Step'],[/Dr\. Elsey/,"Dr. Elsey's"],
+    [/Purina ONE/,'Purina ONE'],[/Fancy Feast/,'Fancy Feast'],[/Friskies/,'Friskies'],
+    [/Good'N'Fun/,"Good'N'Fun"],[/Milk-Bone/,'Milk-Bone'],[/Temptations/,'Temptations'],
+    [/Maybelline/,'Maybelline'],[/Mielle/,'Mielle'],[/essence/,'essence'],[/COSRX/,'COSRX'],
+    [/The Ordinary/,'The Ordinary'],[/Degree/,'Degree'],[/Crest/,'Crest'],[/Colgate/,'Colgate'],
+    [/Dove/,'Dove'],[/eos/,'eos'],[/Neutrogena/,'Neutrogena'],[/Paula/,'Paula']
+  ];
+  for(var i=0;i<rules.length;i++){ if(rules[i][0].test(name)) return rules[i][1]; }
+  return name;
+}
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DAY_MS = 86400000;
+var END_TS = Date.UTC(2026, 6, 18); // anchor: Jul 18, 2026
+var WINDOW_DAYS = 1826;             // ~5 years
+(function buildTxns(){
+  // Reorder a stream so the same product is spaced out: repeatedly emit the
+  // product with the most remaining occurrences that wasn't used in the last K.
+  // (task-scheduler style — spaces heavy items evenly, no tail clumping.)
+  function spaced(arr, K){
+    var q = {};                                    // queues keyed by product family
+    arr.forEach(function(it){ (q[it.fam] = q[it.fam] || []).push(it); });
+    var res = [], recent = [];
+    while(res.length < arr.length){
+      var best = null, bestLen = -1;
+      for(var n in q){ if(!q[n].length || recent.indexOf(n) >= 0) continue; if(q[n].length > bestLen){ bestLen = q[n].length; best = n; } }
+      if(best === null){ for(var n in q){ if(!q[n].length) continue; if(q[n].length > bestLen){ bestLen = q[n].length; best = n; } } }
+      res.push(q[best].shift());
+      recent.push(best); if(recent.length > K) recent.shift();
+    }
+    return res;
+  }
+  // build each category's stream, spaced within itself (→ filtered views stay varied)
+  var buckets = CAT_MIX.map(function(g){
+    var pool = PRODUCT_POOL.filter(function(p){ return p.cat === g.cat; });
+    // deterministic per-product counts from the weighting curve — no RNG variance,
+    // so no single product/family can balloon and defeat the spacer
+    var reps = pool.map(function(p){ return Math.max(2, Math.round(Math.pow(p.w, g.exp))); });
+    var sum = reps.reduce(function(a,b){ return a+b; }, 0);
+    var counts = reps.map(function(r){ return Math.max(1, Math.round(g.n * r / sum)); });
+    // reconcile rounding drift to hit g.n exactly (adjust largest counts first)
+    var order = counts.map(function(c,i){ return i; }).sort(function(a,b){ return counts[b]-counts[a]; });
+    var tot = counts.reduce(function(a,b){ return a+b; }, 0), k = 0;
+    while(tot > g.n){ var i = order[k % order.length]; if(counts[i] > 1){ counts[i]--; tot--; } k++; }
+    while(tot < g.n){ counts[order[k % order.length]]++; tot++; k++; }
+    var arr = [];
+    pool.forEach(function(p, pi){
+      for(var c=0;c<counts[pi];c++){
+        var jitter = 1 + (rand()-0.5)*0.12;               // jitter price ±6%
+        var price = Math.max(1.99, Math.round(p.price*jitter*100)/100);
+        var rs = rand();                                  // status mix ≈ CoreLens panel
+        var status = rs < 0.075 ? 'cancelled' : (rs < 0.11 ? 'returned' : 'shipped');
+        arr.push({ cat:p.cat, sub:p.sub, name:p.name, fam:famOf(p.name), price:price, asin:p.asin, status:status });
+      }
+    });
+    return spaced(arr, 6);
+  });
+  // weighted-random interleave that preserves each category's internal order
+  // (interleaving only widens gaps, so the All view stays de-clustered too)
+  var idx = buckets.map(function(){ return 0; });
+  var items = [];
+  var remaining = buckets.reduce(function(s,b){ return s + b.length; }, 0);
+  while(items.length < remaining){
+    var totalLeft = 0;
+    for(var b=0;b<buckets.length;b++){ totalLeft += (buckets[b].length - idx[b]); }
+    var r = rand()*totalLeft, acc = 0, chosen = 0;
+    for(var b=0;b<buckets.length;b++){
+      var left = buckets[b].length - idx[b];
+      if(left <= 0) continue;
+      acc += left;
+      if(r <= acc){ chosen = b; break; }
+    }
+    items.push(buckets[chosen][idx[chosen]++]);
+  }
+  // exact dates, newest first — assigned positionally so the list stays date-sorted
+  var dates=[];
+  for(var i=0;i<items.length;i++){ dates.push(END_TS - Math.floor(rand()*WINDOW_DAYS)*DAY_MS); }
+  dates.sort(function(a,b){ return b-a; });
+  TXNS = items.map(function(it, i){ it.ts = dates[i]; return it; });
+})();
+function fmtDate(ts){
+  var d = new Date(ts);
+  return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+}
+function imgUrl(asin){ return 'https://images-na.ssl-images-amazon.com/images/P/' + asin + '.01._SL80_.jpg'; }
+
+function fmtMoney(n){ return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtMoney0(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var INSIGHTS = {
+  'all': 'Across 5 years and {N} verified purchases, this shopper spans electronics, pet care, and beauty — a household profile, not a single-category buyer. Replenishment cadence in pet and beauty signals strong subscribe-and-save potential.',
+  'Electronics': 'Electronics skew to Amazon-ecosystem devices (Echo, Fire TV) and Apple accessories. Steady low-ticket accessory reorders make this shopper an easy target for a device-trade-in or bundle offer.',
+  'Pet Supplies': 'A committed multi-cat household — recurring litter and dry-food buys every few weeks. Predictable replenishment makes pet the highest-confidence auto-ship conversion opportunity.',
+  'Beauty': 'Beauty spend is skincare- and mascara-led with frequent low-cost repeats. Trend-driven, high-frequency behavior — ideal for personalized replenishment prompts and new-launch sampling.'
+};
+
+var dataFilter = 'all';
+function computeCounts(){
+  var c = { all: TXNS.length, 'Electronics':0, 'Pet Supplies':0, 'Beauty':0 };
+  TXNS.forEach(function(t){ c[t.cat]++; });
+  return c;
+}
+function renderDataView(){
+  var rows = dataFilter === 'all' ? TXNS : TXNS.filter(function(t){ return t.cat === dataFilter; });
+  // KPIs
+  var total = 0, subs = {};
+  rows.forEach(function(t){ total += t.price; subs[t.sub] = 1; });
+  var orders = rows.length;
+  document.getElementById('kpiSpend').textContent = fmtMoney0(total);
+  document.getElementById('kpiOrders').textContent = orders.toLocaleString('en-US');
+  document.getElementById('kpiAvg').textContent = fmtMoney(orders ? total/orders : 0);
+  document.getElementById('kpiCats').textContent = Object.keys(subs).length;
+  // Rows
+  var html = rows.map(function(t){
+    return '<div class="dt-row"><span class="dt-product">' +
+      '<img class="dt-thumb" loading="lazy" alt="" src="' + imgUrl(t.asin) + '" onerror="this.style.visibility=\'hidden\'">' +
+      '<span class="dt-name">' + escHtml(t.name) + '</span>' +
+      '</span><span><span class="dt-cat">' + escHtml(t.sub) +
+      '</span></span><span class="dt-price">' + fmtMoney(t.price) +
+      '</span><span class="dt-date">' + fmtDate(t.ts) +
+      '</span><span><span class="dt-status ' + t.status + '">' + t.status + '</span></span></div>';
+  }).join('');
+  document.getElementById('dtRows').innerHTML = html;
+  // Insight
+  document.getElementById('insightText').innerHTML = '<strong>Ario Insight:</strong> ' + INSIGHTS[dataFilter].replace('{N}', TXNS.length.toLocaleString('en-US'));
+  // Active pill
+  document.querySelectorAll('.data-filter').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-filter') === dataFilter);
+  });
+}
+function setDataFilter(cat){
+  dataFilter = cat;
+  document.getElementById('dtRows').parentElement.scrollTop = 0;
+  var body = document.querySelector('#step-4 .browser-body');
+  if (body) body.scrollTop = 0;
+  renderDataView();
+}
+(function initDataView(){
+  var counts = computeCounts();
+  document.getElementById('cnt-all').textContent = counts.all.toLocaleString('en-US');
+  document.getElementById('cnt-Electronics').textContent = counts['Electronics'];
+  document.getElementById('cnt-Pet Supplies').textContent = counts['Pet Supplies'];
+  document.getElementById('cnt-Beauty').textContent = counts['Beauty'];
+  renderDataView();
+})();
 
 // ═══════════════════════════════════════
 // INIT — start directly on step 2 (Customer Links)
